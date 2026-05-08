@@ -155,16 +155,6 @@ import { ProductoService } from '../../../services/producto.service';
             </div>
           </div>
         </section>
-
-        <!-- HU2: Informes -->
-        <section class="dashboard-section">
-          <h2 class="section-title">Informes de Almacén</h2>
-          <p class="section-description">Genere informes de inventario, recepciones o discrepancias para el Administrador.</p>
-          <div class="section-content placeholder">
-            <p>Aquí irá la funcionalidad para emitir informes.</p>
-            <button class="action-btn" disabled>Generar Informe</button>
-          </div>
-        </section>
       </main>
     </div>
   `,

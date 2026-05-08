@@ -100,16 +100,6 @@ import { Usuario, Venta } from '../../../models/types';
             </div>
           </div>
         </section>
-
-        <!-- HU2, HU3, HU4 Placeholders -->
-        <section class="dashboard-section">
-          <h2 class="section-title">Gestión de Pedidos en Línea</h2>
-          <p class="section-description">Verifique pagos y gestione la entrega de pedidos a domicilio.</p>
-          <div class="section-content placeholder">
-            <p>Aquí irá la funcionalidad para verificar y despachar pedidos en línea.</p>
-            <button class="action-btn" disabled>Ver Pedidos Pendientes</button>
-          </div>
-        </section>
       </main>
     </div>
   `,

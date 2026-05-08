@@ -4,6 +4,7 @@ import java.math.BigDecimal;
 
 import com.fasterxml.jackson.annotation.JsonBackReference;
 
+import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.FetchType;
 import jakarta.persistence.Id;
@@ -30,9 +31,11 @@ public class FormulaMagistral {
     private String nombre;
 
     @Lob
+    @Column(columnDefinition = "TEXT")
     private String composicion;
 
     @Lob
+    @Column(columnDefinition = "TEXT")
     private String procedimiento;
 
     private BigDecimal precio;

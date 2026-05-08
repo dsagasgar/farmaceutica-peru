@@ -5,6 +5,7 @@ import java.time.LocalDate;
 import java.util.List;
 
 import com.farmaceuticas_peru.back_end.model.enums.EstadoCompra;
+import com.fasterxml.jackson.annotation.JsonManagedReference;
 
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
@@ -13,7 +14,6 @@ import jakarta.persistence.EnumType;
 import jakarta.persistence.Enumerated;
 import jakarta.persistence.FetchType;
 import jakarta.persistence.Id;
-import jakarta.persistence.JoinColumn;
 import jakarta.persistence.OneToMany;
 import jakarta.persistence.Table;
 import lombok.AllArgsConstructor;
@@ -43,8 +43,8 @@ public class CompraProveedor {
     @Column(name = "fecha_recepcion")
     private LocalDate fechaRecepcion;
 
-    @OneToMany(cascade = CascadeType.ALL, fetch = FetchType.EAGER)
-    @JoinColumn(name = "compra_id")
+    @OneToMany(mappedBy = "compra", cascade = CascadeType.ALL, fetch = FetchType.EAGER)
+    @JsonManagedReference
     private List<ItemCompra> items;
 
     private BigDecimal total;

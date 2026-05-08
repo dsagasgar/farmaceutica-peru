@@ -1,33 +1,43 @@
 package com.farmaceuticas_peru.back_end.controller;
 
+import java.util.List;
+
+import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
+
 import com.farmaceuticas_peru.back_end.dto.RecepcionRequest;
 import com.farmaceuticas_peru.back_end.model.CompraProveedor;
 import com.farmaceuticas_peru.back_end.service.CompraProveedorService;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.ResponseEntity;
-import org.springframework.security.access.prepost.PreAuthorize;
-import org.springframework.web.bind.annotation.*;
 
-import java.util.List;
+import lombok.RequiredArgsConstructor;
 
 @RestController
 @RequestMapping("/api/compras")
+@RequiredArgsConstructor
 public class CompraProveedorController {
-    
-    @Autowired
-    private CompraProveedorService compraProveedorService;
+
+    private final CompraProveedorService compraService;
 
     @GetMapping("/para-recepcion")
-    @PreAuthorize("hasAnyRole('ALMACENERO', 'ADMINISTRADOR')")
+    @PreAuthorize("hasAuthority('ROLE_ALMACENERO')")
     public ResponseEntity<List<CompraProveedor>> getComprasParaRecepcion() {
-        List<CompraProveedor> compras = compraProveedorService.getComprasParaRecepcion();
-        return ResponseEntity.ok(compras);
+        return ResponseEntity.ok(compraService.getComprasParaRecepcion());
     }
 
     @PostMapping("/{compraId}/registrar-recepcion")
-    @PreAuthorize("hasAnyRole('ALMACENERO', 'ADMINISTRADOR')")
-    public ResponseEntity<CompraProveedor> registrarRecepcion(@PathVariable String compraId, @RequestBody RecepcionRequest recepcionRequest) {
-        CompraProveedor compraActualizada = compraProveedorService.registrarRecepcion(compraId, recepcionRequest.getItemsVerificados(), recepcionRequest.getObservaciones());
+    @PreAuthorize("hasAuthority('ROLE_ALMACENERO')")
+    public ResponseEntity<CompraProveedor> registrarRecepcion(
+            @PathVariable String compraId,
+            @RequestBody RecepcionRequest payload) {
+
+        CompraProveedor compraActualizada = compraService.registrarRecepcion(
+                compraId, payload.getItems(), payload.getObservaciones());
         return ResponseEntity.ok(compraActualizada);
     }
 }

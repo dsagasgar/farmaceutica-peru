@@ -2,12 +2,17 @@ package com.farmaceuticas_peru.back_end.dto;
 
 import java.util.List;
 
-import com.farmaceuticas_peru.back_end.model.ItemCompra;
-
 import lombok.Data;
 
 @Data
 public class RecepcionRequest {
-    private List<ItemCompra> itemsVerificados;
+
+    @Data
+    public static class ItemRecepcion {
+        private Long id;
+        private Integer cantidadRecibida;
+    }
+
+    private List<ItemRecepcion> items;
     private String observaciones;
 }

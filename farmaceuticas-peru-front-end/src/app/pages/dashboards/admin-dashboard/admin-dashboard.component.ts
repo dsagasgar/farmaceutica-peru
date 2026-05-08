@@ -33,82 +33,42 @@ import { Observable } from 'rxjs';
             <div class="stats-grid">
               <div class="stat-card">
                 <div class="stat-content">
-                  <p class="stat-label">Usuarios Activos</p>
-                  <p class="stat-value">{{ stats.usuariosActivos }}</p>
+                  <p class="stat-label">Total Usuarios</p>
+                  <p class="stat-value">{{ stats.totalUsuarios }}</p>
                 </div>
               </div>
 
               <div class="stat-card">
                 <div class="stat-content">
-                  <p class="stat-label">Ventas Hoy</p>
-                  <p class="stat-value">{{ stats.ventasHoy | currency:'S/ ' }}</p>
+                  <p class="stat-label">Ingresos de Hoy</p>
+                  <p class="stat-value">{{ stats.ingresosHoy | currency:'S/ ' }}</p>
                 </div>
               </div>
 
               <div class="stat-card">
                 <div class="stat-content">
-                  <p class="stat-label">Productos</p>
-                  <p class="stat-value">{{ stats.productosTotales }}</p>
+                  <p class="stat-label">Total Productos</p>
+                  <p class="stat-value">{{ stats.totalProductos }}</p>
                 </div>
               </div>
 
               <div class="stat-card">
                 <div class="stat-content">
-                  <p class="stat-label">Órdenes Completadas</p>
-                  <p class="stat-value">{{ stats.ordenesCompletadas }}</p>
+                  <p class="stat-label">Ventas de Hoy</p>
+                  <p class="stat-value">{{ stats.ventasHoy }}</p>
                 </div>
               </div>
             </div>
           </section>
         </ng-container>
 
-        <!-- OPCIONES DE ADMINISTRACIÓN -->
-        <section class="options-section">
-          <h2>Gestión del Sistema</h2>
-          <div class="options-grid">
-            <!-- Opción para HU1, HU2, HU3 -->
-            <div class="option-card">
-              <h3>Gestión de Compras</h3>
-              <p>Registrar facturas, enviar a almacén y gestionar pagos a proveedores.</p>
-              <button [routerLink]="['/admin/compras']" class="option-btn">
-                Gestionar
-              </button>
-            </div>
-
-            <!-- Opción para HU4 -->
-            <div class="option-card">
-              <h3>Reportes de Áreas</h3>
-              <p>Monitorear la operación con informes de ventas, inventario y más.</p>
-              <button [routerLink]="['/admin/reportes']" class="option-btn">
-                Ver Reportes
-              </button>
-            </div>
-
-            <div class="option-card">
-              <h3>Gestionar Usuarios</h3>
-              <p>Crear, editar y eliminar cuentas de los empleados del sistema.</p>
-              <button [routerLink]="['/admin/usuarios']" class="option-btn">
-                Gestionar
-              </button>
-            </div>
-
-            <div class="option-card">
-              <h3>Configuración</h3>
-              <p>Ajustar parámetros generales del sistema y la empresa.</p>
-              <button [routerLink]="['/admin/configuracion']" class="option-btn">
-                Configurar
-              </button>
-            </div>
-          </div>
-        </section>
-
         <ng-container *ngIf="actividadReciente$ | async as actividades; else loadingActivity">
           <section class="activity-section">
             <h2>Actividad Reciente</h2>
             <div class="activity-list">
               <div *ngFor="let item of actividades" class="activity-item">
-                <p class="activity-title">{{ item.titulo }}</p>
-                <p class="activity-time">{{ item.tiempo }}</p>
+                <p class="activity-title">{{ item.descripcion }}</p>
+                <p class="activity-time">{{ item.fecha | date:'medium' }}</p>
               </div>
               <div *ngIf="actividades.length === 0" class="no-activity">No hay actividad reciente.</div>
             </div>
