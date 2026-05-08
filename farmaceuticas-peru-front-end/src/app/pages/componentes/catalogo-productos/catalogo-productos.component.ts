@@ -28,8 +28,8 @@ import { debounceTime, distinctUntilChanged, switchMap, startWith } from 'rxjs/o
               <th>Nombre</th>
               <th>Categoría</th>
               <th>Marca</th>
-              <th>Precio</th>
-              <th>Stock</th>
+              <th>Precio Unit.</th>
+              <th>Stock Disponible</th>
             </tr>
           </thead>
           <tbody>
@@ -38,8 +38,8 @@ import { debounceTime, distinctUntilChanged, switchMap, startWith } from 'rxjs/o
                 <td>{{ producto.nombre }}</td>
                 <td>{{ producto.categoria }}</td>
                 <td>{{ producto.marca }}</td>
-                <td>{{ producto.precio | currency:'S/ ' }}</td>
-                <td>{{ producto.stock }}</td>
+                <td>{{ producto.precioUnitario | currency:'S/ ' }}</td>
+                <td>{{ producto.stockVenta }}</td>
               </tr>
               <tr *ngIf="productos.length === 0">
                 <td colspan="5" class="no-results">No se encontraron productos.</td>
@@ -103,7 +103,7 @@ export class CatalogoProductosComponent implements OnInit {
       // Ignora si el nuevo término es igual al anterior
       distinctUntilChanged(),
       // Cambia a la nueva búsqueda y cancela la anterior
-      switchMap((term: string) => this.productoService.buscarProductos(term)),
+      switchMap((term: string) => this.productoService.buscarProductosParaVenta(term)),
     );
   }
 

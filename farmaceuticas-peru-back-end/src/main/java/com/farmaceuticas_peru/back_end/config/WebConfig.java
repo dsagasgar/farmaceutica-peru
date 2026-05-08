@@ -9,7 +9,7 @@ public class WebConfig implements WebMvcConfigurer {
 
     @Override
     public void addCorsMappings(CorsRegistry registry) {
-        // Permite que la app Angular (en localhost:4200) haga peticiones a la API.
+        // Permite que la app Angular (en localhost:4200) haga peticiones a esta API.
         registry.addMapping("/api/**") // Aplica a todas las rutas que empiecen con /api
                 .allowedOrigins("http://localhost:4200")
                 .allowedMethods("GET", "POST", "PUT", "DELETE", "OPTIONS")

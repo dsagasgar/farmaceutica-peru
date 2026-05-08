@@ -11,14 +11,18 @@ export interface Usuario {
 }
 
 export interface Producto {
-  id: string;
+  id: string; // Mantenido como identificador único
+  codigo?: string; // Nuevo: Código de barras o SKU
   nombre: string;
-  precio: number;
-  stock: number;
+  descripcion: string;
+  precioUnitario: number;
+  stock: number; // Cantidad total en almacén
+  stockVenta: number; // Cantidad disponible para la venta al público
   categoria: string;
   marca: string;
   fechaVencimiento: Date;
   lote: string;
+  formato?: string; // Nuevo: Ej. "Caja x 20 tabletas"
 }
 
 export interface Venta {
@@ -31,11 +35,20 @@ export interface Venta {
     precioUnitario: number;
     subtotal: number;
   }[];
+  itemsFormula?: FormulaMagistral[]; // Nuevo: Para fórmulas magistrales
   total: number;
   quimicoId: string; // ID del QF que generó la orden
   cajeroId?: string; // ID del cajero que procesó el pago
   clienteNombre?: string; // Nombre del cliente para la boleta/factura
   status: 'PENDIENTE_PAGO' | 'PAGADO' | 'ENVIADO' | 'ENTREGADO';
+}
+
+export interface FormulaMagistral {
+  id: string;
+  nombre: string; // Ej: "Crema de hidrocortisona al 1%"
+  composicion: string; // Detalle de componentes y cantidades
+  procedimiento: string; // Pasos de elaboración
+  precio: number;
 }
 
 export interface ItemCompra {
@@ -58,8 +71,30 @@ export interface CompraProveedor {
   observacionesAlmacen?: string;
 }
 
+export interface Informe {
+  id: string;
+  tipo: 'RECEPCION' | 'INVENTARIO' | 'DISCREPANCIAS';
+  fechaGeneracion: Date;
+  generadoPorId: string; // ID del usuario que lo generó (almacenero, admin)
+  datos: any; // Contenido flexible según el tipo de informe
+}
+
 export interface EstadoAutenticacion {
   estaAutenticado: boolean;
   usuarioActual: Usuario | null;
   token?: string; // Para capas más avanzadas
+}
+
+export interface AdminStats {
+  usuariosActivos: number;
+  ventasHoy: number;
+  productosTotales: number;
+  ordenesCompletadas: number;
+}
+
+export interface ActividadReciente {
+  id: string;
+  titulo: string;
+  tiempo: string; // Ej: "Hace 15 minutos"
+  tipo: 'INFORME' | 'USUARIO' | 'COMPRA';
 }

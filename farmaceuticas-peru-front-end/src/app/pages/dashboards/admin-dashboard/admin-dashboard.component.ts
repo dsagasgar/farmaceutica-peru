@@ -1,13 +1,15 @@
-import { Component } from '@angular/core';
+import { Component, inject, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { Router } from '@angular/router';
+import { Router, RouterModule } from '@angular/router';
 import { AuthService } from '../../../services/auth.service';
-import { Usuario } from '../../../models/types';
+import { AdminDashboardService } from '../../../services/admin-dashboard.service';
+import { Usuario, AdminStats, ActividadReciente } from '../../../models/types';
+import { Observable } from 'rxjs';
 
 @Component({
   selector: 'app-admin-dashboard',
-  standalone: true,
-  imports: [CommonModule],
+  standalone: true, // RouterModule es necesario para los botones con [routerLink]
+  imports: [CommonModule, RouterModule],
   template: `
     <div class="dashboard-container">
       <!-- ENCABEZADO -->
@@ -24,39 +26,41 @@ import { Usuario } from '../../../models/types';
 
       <!-- CONTENIDO PRINCIPAL -->
       <main class="dashboard-main">
-        <!-- ESTADÍSTICAS -->
-        <section class="stats-section">
-          <h2>Estadísticas del Sistema</h2>
-          <div class="stats-grid">
-            <div class="stat-card">
-              <div class="stat-content">
-                <p class="stat-label">Usuarios Activos</p>
-                <p class="stat-value">24</p>
+        <!-- ESTADÍSTICAS (Ahora dinámicas con el pipe async) -->
+        <ng-container *ngIf="stats$ | async as stats; else loadingStats">
+          <section class="stats-section">
+            <h2>Estadísticas del Sistema</h2>
+            <div class="stats-grid">
+              <div class="stat-card">
+                <div class="stat-content">
+                  <p class="stat-label">Usuarios Activos</p>
+                  <p class="stat-value">{{ stats.usuariosActivos }}</p>
+                </div>
               </div>
-            </div>
 
-            <div class="stat-card">
-              <div class="stat-content">
-                <p class="stat-label">Ventas Hoy</p>
-                <p class="stat-value">$2,450</p>
+              <div class="stat-card">
+                <div class="stat-content">
+                  <p class="stat-label">Ventas Hoy</p>
+                  <p class="stat-value">{{ stats.ventasHoy | currency:'S/ ' }}</p>
+                </div>
               </div>
-            </div>
 
-            <div class="stat-card">
-              <div class="stat-content">
-                <p class="stat-label">Productos</p>
-                <p class="stat-value">156</p>
+              <div class="stat-card">
+                <div class="stat-content">
+                  <p class="stat-label">Productos</p>
+                  <p class="stat-value">{{ stats.productosTotales }}</p>
+                </div>
               </div>
-            </div>
 
-            <div class="stat-card">
-              <div class="stat-content">
-                <p class="stat-label">Órdenes Completadas</p>
-                <p class="stat-value">342</p>
+              <div class="stat-card">
+                <div class="stat-content">
+                  <p class="stat-label">Órdenes Completadas</p>
+                  <p class="stat-value">{{ stats.ordenesCompletadas }}</p>
+                </div>
               </div>
             </div>
-          </div>
-        </section>
+          </section>
+        </ng-container>
 
         <!-- OPCIONES DE ADMINISTRACIÓN -->
         <section class="options-section">
@@ -66,7 +70,7 @@ import { Usuario } from '../../../models/types';
             <div class="option-card">
               <h3>Gestión de Compras</h3>
               <p>Registrar facturas, enviar a almacén y gestionar pagos a proveedores.</p>
-              <button (click)="navigate('/admin/compras')" class="option-btn">
+              <button [routerLink]="['/admin/compras']" class="option-btn">
                 Gestionar
               </button>
             </div>
@@ -75,7 +79,7 @@ import { Usuario } from '../../../models/types';
             <div class="option-card">
               <h3>Reportes de Áreas</h3>
               <p>Monitorear la operación con informes de ventas, inventario y más.</p>
-              <button (click)="navigate('/admin/reportes')" class="option-btn">
+              <button [routerLink]="['/admin/reportes']" class="option-btn">
                 Ver Reportes
               </button>
             </div>
@@ -83,7 +87,7 @@ import { Usuario } from '../../../models/types';
             <div class="option-card">
               <h3>Gestionar Usuarios</h3>
               <p>Crear, editar y eliminar cuentas de los empleados del sistema.</p>
-              <button (click)="navigate('/admin/usuarios')" class="option-btn">
+              <button [routerLink]="['/admin/usuarios']" class="option-btn">
                 Gestionar
               </button>
             </div>
@@ -91,37 +95,33 @@ import { Usuario } from '../../../models/types';
             <div class="option-card">
               <h3>Configuración</h3>
               <p>Ajustar parámetros generales del sistema y la empresa.</p>
-              <button (click)="navigate('/admin/configuracion')" class="option-btn">
+              <button [routerLink]="['/admin/configuracion']" class="option-btn">
                 Configurar
               </button>
             </div>
           </div>
         </section>
 
-        <section class="activity-section">
-          <h2>Actividad Reciente</h2>
-          <div class="activity-list">
-            <div class="activity-item">
-              <p class="activity-title">Informe de observaciones recibido para la compra 'COMPRA-2024-001' (Almacén)</p>
-              <p class="activity-time">Hace 15 minutos</p>
+        <ng-container *ngIf="actividadReciente$ | async as actividades; else loadingActivity">
+          <section class="activity-section">
+            <h2>Actividad Reciente</h2>
+            <div class="activity-list">
+              <div *ngFor="let item of actividades" class="activity-item">
+                <p class="activity-title">{{ item.titulo }}</p>
+                <p class="activity-time">{{ item.tiempo }}</p>
+              </div>
+              <div *ngIf="actividades.length === 0" class="no-activity">No hay actividad reciente.</div>
             </div>
+          </section>
+        </ng-container>
 
-            <div class="activity-item">
-              <p class="activity-title">Informe de ventas diario disponible (Caja)</p>
-              <p class="activity-time">Hace 1 hora</p>
-            </div>
-
-            <div class="activity-item">
-              <p class="activity-title">Nuevo usuario creado: 'Ana Almacén'</p>
-              <p class="activity-time">Hace 3 horas</p>
-            </div>
-
-            <div class="activity-item">
-              <p class="activity-title">Compra a proveedor 'PROVEEDOR-X' registrada</p>
-              <p class="activity-time">Hace 5 horas</p>
-            </div>
-          </div>
-        </section>
+        <!-- TEMPLATES DE CARGA -->
+        <ng-template #loadingStats>
+          <div class="placeholder">Cargando estadísticas...</div>
+        </ng-template>
+        <ng-template #loadingActivity>
+          <div class="placeholder">Cargando actividad reciente...</div>
+        </ng-template>
       </main>
     </div>
   `,
@@ -319,6 +319,11 @@ import { Usuario } from '../../../models/types';
       font-size: 0.9rem;
     }
 
+    .placeholder, .no-activity {
+      text-align: center; padding: 2rem; border: 2px dashed #e9ecef;
+      border-radius: 6px; color: #6c757d; margin-top: 1rem;
+    }
+
     @media (max-width: 768px) {
       .header-top {
         flex-direction: column;
@@ -342,34 +347,28 @@ import { Usuario } from '../../../models/types';
     }
   `]
 })
-export class AdminDashboardComponent {
-  /**
-   * OBTENER USUARIO ACTUAL
-   * (El usuario que está actualmente logueado)
-   */
-  usuario: Usuario | null = null;
+export class AdminDashboardComponent implements OnInit {
+  // Inyección de dependencias moderna con inject()
+  private authService = inject(AuthService);
+  private router = inject(Router);
+  private dashboardService = inject(AdminDashboardService);
 
-  constructor(
-    private authService: AuthService,
-    private router: Router
-  ) {
+  usuario: Usuario | null = null;
+  stats$!: Observable<AdminStats>;
+  actividadReciente$!: Observable<ActividadReciente[]>;
+
+  constructor() {
     this.usuario = this.authService.obtenerUsuarioActual();
   }
 
-  /**
-   * CERRAR SESIÓN
-   * Limpia el estado de autenticación y vuelve al login
-   */
+  ngOnInit(): void {
+    // Al iniciar, obtenemos los observables de los servicios
+    this.stats$ = this.dashboardService.getStats();
+    this.actividadReciente$ = this.dashboardService.getActividadReciente();
+  }
+
   logout(): void {
     this.authService.logout();
     this.router.navigate(['/login']);
-  }
-
-  /**
-   * NAVEGAR
-   * Helper para ir a otras páginas
-   */
-  navigate(path: string): void {
-    this.router.navigate([path]);
   }
 }

@@ -4,8 +4,9 @@ import { FormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
 import { AuthService } from '../../../services/auth.service';
 import { CompraService } from '../../../services/compra.service';
-import { Usuario, CompraProveedor, ItemCompra } from '../../../models/types';
+import { Usuario, CompraProveedor, ItemCompra, Producto } from '../../../models/types';
 import { Observable } from 'rxjs';
+import { ProductoService } from '../../../services/producto.service';
 
 /**
  * Gestiona el panel del Almacenero.
@@ -14,7 +15,7 @@ import { Observable } from 'rxjs';
 @Component({
   selector: 'app-almacen-dashboard',
   standalone: true,
-  imports: [CommonModule, FormsModule],
+  imports: [CommonModule, FormsModule], // Importamos CatalogoProductosComponent para usarlo
   template: `
     <!-- 1. ESTRUCTURA HTML: Define la vista del componente -->
     <div class="dashboard-container">
@@ -111,6 +112,50 @@ import { Observable } from 'rxjs';
           </div>
         </section>
 
+        <!-- NUEVA SECCIÓN: Gestión de Stock para Venta -->
+        <section class="dashboard-section">
+          <h2 class="section-title">Gestión de Stock para Venta</h2>
+          <p class="section-description">
+            Ajuste la cantidad de productos disponibles para la venta al público. El stock de venta no puede superar el stock total en almacén.
+          </p>
+          <div class="section-content">
+            <div class="table-wrapper">
+              <table class="items-table">
+                <thead>
+                  <tr>
+                    <th>Producto</th>
+                    <th>Stock Total</th>
+                    <th>Stock para Venta</th>
+                    <th>Acción</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <ng-container *ngIf="productosGestion$ | async as productos; else loadingStock">
+                    <tr *ngFor="let producto of productos">
+                      <td>{{ producto.nombre }} ({{ producto.codigo }})</td>
+                      <td class="text-center">{{ producto.stock }}</td>
+                      <td class="text-center">
+                        <input 
+                          type="number" 
+                          min="0"
+                          [max]="producto.stock"
+                          [(ngModel)]="producto.stockVenta"
+                          [name]="'stockVenta-' + producto.id"
+                          class="stock-input"
+                        >
+                      </td>
+                      <td class="text-center">
+                        <button (click)="actualizarStockVenta(producto)" class="action-btn-small">Actualizar</button>
+                      </td>
+                    </tr>
+                  </ng-container>
+                </tbody>
+                <ng-template #loadingStock><tr><td colspan="4" class="placeholder">Cargando productos...</td></tr></ng-template>
+              </table>
+            </div>
+          </div>
+        </section>
+
         <!-- HU2: Informes -->
         <section class="dashboard-section">
           <h2 class="section-title">Informes de Almacén</h2>
@@ -158,6 +203,7 @@ import { Observable } from 'rxjs';
     .items-table th, .items-table td { padding: 0.75rem; border: 1px solid #dee2e6; text-align: center; }
     .items-table thead th { background-color: #e9ecef; font-weight: 600; }
     .items-table td:first-child { text-align: left; }
+    .text-center { text-align: center; }
     .items-table input { width: 80px; padding: 0.5rem; text-align: center; border: 1px solid #ced4da; border-radius: 4px; }
     .observaciones-section { margin-bottom: 1.5rem; }
     .observaciones-section label { display: block; margin-bottom: 0.5rem; font-weight: 600; }
@@ -165,6 +211,11 @@ import { Observable } from 'rxjs';
     .submit-btn { background-color: #28a745; color: white; border: none; padding: 0.8rem 1.5rem; font-size: 1rem; font-weight: 600; border-radius: 6px; cursor: pointer; }
     .submit-btn:disabled { background-color: #6c757d; }
     .error-msg { color: #721c24; margin-bottom: 1rem; }
+    .stock-input { width: 100px; }
+    .action-btn-small {
+      background-color: #17a2b8; color: white; border: none;
+      padding: 0.4rem 0.8rem; border-radius: 4px; cursor: pointer;
+    }
   `]
 })
 // 3. LÓGICA TYPESCRIPT: Define el comportamiento del componente.
@@ -173,11 +224,14 @@ export class AlmacenDashboardComponent implements OnInit {
   private authService = inject(AuthService);
   private compraService = inject(CompraService);
   private router = inject(Router);
+  private productoService = inject(ProductoService);
 
   // --- PROPIEDADES DE ESTADO ---
   usuario: Usuario | null = null;
   // Observable que contiene la lista de compras pendientes a recibir. El pipe `async` en el HTML se suscribe a él.
   compras$!: Observable<CompraProveedor[]>;
+  // Observable para la lista de productos en la sección de gestión de stock.
+  productosGestion$!: Observable<Producto[]>;
   // Almacena la compra que el usuario está verificando actualmente. Controla qué vista se muestra.
   compraSeleccionada: CompraProveedor | null = null;
   // Copia de los items de la compra seleccionada para poder editarlos en el formulario sin afectar el original.
@@ -194,6 +248,7 @@ export class AlmacenDashboardComponent implements OnInit {
   // ngOnInit: Gancho del ciclo de vida. Se ejecuta una vez que el componente se ha inicializado. Ideal para cargar datos iniciales.
   ngOnInit(): void {
     this.compras$ = this.compraService.getComprasParaRecepcion();
+    this.productosGestion$ = this.productoService.buscarProductosParaAlmacen(''); // Carga todos los productos para la gestión
   }
 
   // --- MÉTODOS DE FLUJO DE TRABAJO ---
@@ -201,8 +256,8 @@ export class AlmacenDashboardComponent implements OnInit {
   /** Se activa al hacer clic en "Verificar". Cambia la vista a detalle y prepara el formulario. */
   seleccionarCompra(compra: CompraProveedor): void {
     this.compraSeleccionada = compra;
-    // Clonamos los items para no modificar el objeto original en la lista mientras editamos.
-    this.itemsVerificacion = JSON.parse(JSON.stringify(compra.items));
+    // Clonamos los items de forma segura para no modificar el objeto original en la lista mientras editamos.
+    this.itemsVerificacion = compra.items.map(item => ({ ...item }));
     // Pre-llenar la cantidad recibida con la cantidad pedida para facilitar la tarea
     this.itemsVerificacion.forEach(item => {
       item.cantidadRecibida = item.cantidadRecibida ?? item.cantidadPedida;
@@ -236,6 +291,20 @@ export class AlmacenDashboardComponent implements OnInit {
           this.procesando = false;
         }
       });
+  }
+
+  /** Actualiza la cantidad de stock disponible para la venta de un producto. */
+  actualizarStockVenta(producto: Producto): void {
+    // Aquí podrías añadir una lógica de feedback visual (ej. un spinner en el botón)
+    this.productoService.actualizarStockVenta(producto.id, producto.stockVenta).subscribe({
+      next: (productoActualizado) => {
+        console.log('Stock de venta actualizado', productoActualizado);
+        // Opcional: mostrar un toast/mensaje de éxito.
+        // Para refrescar la lista, podrías re-llamar al servicio, o si el backend devuelve
+        // el objeto actualizado, simplemente actualizarlo en la lista local.
+      },
+      error: (err) => console.error('Error al actualizar stock de venta', err)
+    });
   }
 
   /** Cierra la sesión del usuario y lo redirige a la página de login. */
