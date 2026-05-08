@@ -1,73 +1,73 @@
-import { computed, inject, Injectable, signal } from '@angular/core';
+import { Injectable, inject } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
-import { Observable, of, throwError } from 'rxjs';
-import { tap, catchError, map } from 'rxjs/operators';
-import { Usuario } from '../models/types';
+import { Router } from '@angular/router';
+import { BehaviorSubject, Observable, tap } from 'rxjs';
 import { environment } from '../../environments/environment';
 
+// Definimos las interfaces aquí para que el servicio sea autocontenido.
+export interface Usuario {
+  id: string;
+  email: string;
+  nombre: string;
+  rol: 'ADMINISTRADOR' | 'QUIMICO_FARMACEUTICO' | 'ALMACENERO' | 'CAJERO';
+}
+
+interface AuthResponse {
+  jwt: string;
+  user: Usuario;
+}
+
 @Injectable({
-  providedIn: 'root' 
+  providedIn: 'root'
 })
 export class AuthService {
-  private usuarioActualSignal = signal<Usuario | null>(null);
-  private estaAutenticadoSignal = signal<boolean>(false);
-
-  public estaAutenticado$ = computed(() => this.estaAutenticadoSignal());
-  public usuarioActual$ = computed(() => this.usuarioActualSignal());
-
   private http = inject(HttpClient);
-  private apiUrl = environment.apiUrl;
+  private router = inject(Router);
+  private apiUrl = `${environment.apiUrl}/auth`;
+
+  private usuarioActualSubject = new BehaviorSubject<Usuario | null>(null);
+  public usuarioActual$ = this.usuarioActualSubject.asObservable();
 
   constructor() {
-    this.cargarDelLocalStorage();
+    this.cargarSesion();
   }
 
-  login(email: string, password: string): Observable<any> {
-    // --- CONEXIÓN REAL CON EL BACKEND ---
-    return this.http.post<any>(`${this.apiUrl}/auth/login`, { email, password }).pipe(
-      tap(response => {
-        // ✅ Login exitoso desde el backend
-        const usuario = response.user;
-        this.usuarioActualSignal.set(usuario);
-        this.estaAutenticadoSignal.set(true);
-        localStorage.setItem('usuarioActual', JSON.stringify(usuario));
-        console.log(`✅ Login exitoso: ${usuario.nombre} (${usuario.rol})`);
-      }),
-      catchError(error => {
-        // Limpiamos cualquier estado de sesión previo
-        this.logout();
-        // Propagamos el error para que el componente de login pueda mostrar un mensaje.
-        return throwError(() => error);
-      })
-    );
+  login(email: string, password: string): Observable<AuthResponse> {
+    return this.http.post<AuthResponse>(`${this.apiUrl}/login`, { email, password })
+      .pipe(
+        tap(response => this.guardarSesion(response.jwt, response.user))
+      );
   }
 
   logout(): void {
-    this.usuarioActualSignal.set(null);
-    this.estaAutenticadoSignal.set(false);
-    localStorage.removeItem('usuarioActual');
+    localStorage.removeItem('token');
+    localStorage.removeItem('usuario');
+    this.usuarioActualSubject.next(null);
+    this.router.navigate(['/login']);
     console.log('✅ Sesión cerrada');
   }
 
   obtenerUsuarioActual(): Usuario | null {
-    return this.usuarioActualSignal();
+    return this.usuarioActualSubject.getValue();
   }
 
-  usuarioTieneRol(rol: string): boolean {
-    const usuario = this.usuarioActualSignal();
-    return usuario?.rol === rol;
+  // ESTE ES EL MÉTODO QUE SOLUCIONA EL ERROR
+  getToken(): string | null {
+    return localStorage.getItem('token');
   }
 
-  private cargarDelLocalStorage(): void {
-    try {
-      const usuarioGuardado = localStorage.getItem('usuarioActual');
-      if (usuarioGuardado) {
-        const usuario = JSON.parse(usuarioGuardado);
-        this.usuarioActualSignal.set(usuario);
-        this.estaAutenticadoSignal.set(true);
-      }
-    } catch (error) {
-      console.error('Error cargando usuario del localStorage', error);
+  private guardarSesion(token: string, usuario: Usuario): void {
+    localStorage.setItem('token', token);
+    localStorage.setItem('usuario', JSON.stringify(usuario));
+    this.usuarioActualSubject.next(usuario);
+    console.log(`✅ Login exitoso: ${usuario.nombre} (${usuario.rol})`);
+  }
+
+  private cargarSesion(): void {
+    const token = localStorage.getItem('token');
+    const usuarioString = localStorage.getItem('usuario');
+    if (token && usuarioString) {
+      this.usuarioActualSubject.next(JSON.parse(usuarioString));
     }
   }
 }

@@ -19,8 +19,8 @@ export class VentaService {
 
   registrarPago(id: string, cajeroId: string): Observable<Venta> {
     const payload = { cajeroId };
-    // El backend se encargará de cambiar el estado, asociar al cajero y actualizar el stock de productos.
-    return this.http.post<Venta>(`${this.apiUrl}/${id}/pagar`, payload);
+    // Se ajusta el método a PUT y la URL al endpoint correcto del backend.
+    return this.http.put<Venta>(`${this.apiUrl}/${id}/registrar-pago`, payload);
   }
 
   crearVenta(nuevaVenta: Omit<Venta, 'id' | 'fecha' | 'status'>): Observable<Venta> {

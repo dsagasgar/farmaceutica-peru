@@ -15,25 +15,25 @@ export const routes: Routes = [
     path: 'dashboard/administrador',
     component: AdminDashboardComponent,
     canActivate: [authGuard],
-    data: { role: 'administrador' }
+    data: { role: 'ADMINISTRADOR' }
   },
   {
     path: 'dashboard/quimico',
     component: QuimicoDashboardComponent,
     canActivate: [authGuard],
-    data: { role: 'quimico' }
+    data: { role: 'QUIMICO_FARMACEUTICO' }
   },
   {
     path: 'dashboard/cajero',
     component: CajeroDashboardComponent,
     canActivate: [authGuard],
-    data: { role: 'cajero' }
+    data: { role: 'CAJERO' }
   },
   {
     path: 'dashboard/almacen',
     component: AlmacenDashboardComponent,
     canActivate: [authGuard],
-    data: { role: 'almacen' }
+    data: { role: 'ALMACENERO' }
   },
   {
     path: '',

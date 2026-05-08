@@ -2,11 +2,16 @@ package com.farmaceuticas_peru.back_end.model;
 
 import java.math.BigDecimal;
 
+import com.fasterxml.jackson.annotation.JsonBackReference;
+
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
+import jakarta.persistence.FetchType;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -14,12 +19,12 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 @Entity
-@Table(name = "items_compra")
+@Table(name = "items_venta")
 @Data
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-public class ItemCompra {
+public class ItemVenta {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -31,12 +36,15 @@ public class ItemCompra {
     @Column(name = "nombre_producto")
     private String nombreProducto;
 
-    @Column(name = "cantidad_pedida")
-    private Integer cantidadPedida;
+    private int cantidad;
 
-    @Column(name = "cantidad_recibida")
-    private Integer cantidadRecibida;
+    @Column(name = "precio_unitario")
+    private BigDecimal precioUnitario;
 
-    @Column(name = "costo_unitario")
-    private BigDecimal costoUnitario;
+    private BigDecimal subtotal;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "venta_id")
+    @JsonBackReference("venta-items")
+    private Venta venta;
 }

@@ -58,30 +58,6 @@ import { NuevoPedidoComponent } from '../../componentes/nuevo-pedido/nuevo-pedid
             </app-nuevo-pedido>
           </div>
         </section>
-
-        <section class="dashboard-section">
-          <h2 class="section-title">Fórmulas Magistrales</h2>
-          <p class="section-description">
-            Redacte y gestione las etiquetas y hojas de información para fórmulas magistrales.
-          </p>
-          <div class="section-content placeholder">
-            <!-- Próximamente: Componente para fórmulas magistrales -->
-            <p>Aquí irá la funcionalidad para redactar fórmulas.</p>
-            <button class="action-btn" disabled>Crear Fórmula</button>
-          </div>
-        </section>
-
-        <section class="dashboard-section">
-          <h2 class="section-title">Informes</h2>
-          <p class="section-description">
-            Genere y emita informes de actividad para el administrador.
-          </p>
-          <div class="section-content placeholder">
-             <!-- Próximamente: Componente de reportes -->
-            <p>Aquí irá la funcionalidad para emitir informes.</p>
-            <button class="action-btn" disabled>Generar Informe</button>
-          </div>
-        </section>
       </main>
     </div>
   `,

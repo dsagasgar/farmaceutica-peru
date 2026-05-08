@@ -9,12 +9,11 @@ import org.springframework.security.core.userdetails.UserDetails;
 
 import com.farmaceuticas_peru.back_end.model.enums.Rol;
 
+import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
 import jakarta.persistence.Enumerated;
 import jakarta.persistence.FetchType;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.OneToOne;
 import lombok.AllArgsConstructor;
@@ -30,10 +29,11 @@ import lombok.NoArgsConstructor;
 public class Usuario implements UserDetails {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.UUID) // Best practice for String IDs
+    // @GeneratedValue(strategy = GenerationType.UUID) // Eliminado para permitir ID manuales en la BD
     private String id;
     
     private String email;
+    @Column(name = "password_hash")
     private String passwordHash;
     private String nombre;
 
@@ -48,7 +48,7 @@ public class Usuario implements UserDetails {
         if (rol == null) {
             return List.of();
         }
-        return List.of(new SimpleGrantedAuthority("ROLE_" + rol.name())); // Standard Spring Security prefix
+        return List.of(new SimpleGrantedAuthority("ROLE_" + rol.name()));
     }
 
     @Override

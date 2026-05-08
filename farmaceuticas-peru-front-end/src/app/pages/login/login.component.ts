@@ -190,10 +190,10 @@ export class LoginComponent {
         const usuario = response.user;
         
         const rutaPorRol: Record<string, string> = {
-          'administrador': '/dashboard/administrador',
-          'cajero': '/dashboard/cajero',
-          'almacen': '/dashboard/almacen',
-          'quimico': '/dashboard/quimico'
+          'ADMINISTRADOR': '/dashboard/administrador',
+          'CAJERO': '/dashboard/cajero',
+          'ALMACENERO': '/dashboard/almacen',
+          'QUIMICO_FARMACEUTICO': '/dashboard/quimico'
         };
         this.router.navigate([rutaPorRol[usuario.rol]]);
       },

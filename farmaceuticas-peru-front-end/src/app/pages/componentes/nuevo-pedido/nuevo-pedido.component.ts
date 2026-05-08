@@ -4,7 +4,9 @@ import { FormsModule } from '@angular/forms';
 import { ProductoService } from '../../../services/producto.service';
 import { VentaService } from '../../../services/venta.service';
 import { AuthService } from '../../../services/auth.service';
-import { Producto, Venta, Usuario } from '../../../models/types';
+import { Subject } from 'rxjs';
+import { debounceTime, distinctUntilChanged, switchMap } from 'rxjs/operators';
+import { Producto, Venta, Usuario, FormulaMagistral } from '../../../models/types';
 
 @Component({
   selector: 'app-nuevo-pedido',
@@ -38,7 +40,7 @@ import { Producto, Venta, Usuario } from '../../../models/types';
           <span>{{ item.producto.nombre }}</span>
           <div class="item-controls">
             <input type="number" [min]="1" [max]="item.producto.stock" [value]="item.cantidad" (change)="actualizarCantidad(item.producto.id, $event)">
-            <span>x {{ item.producto.precio | currency:'S/ ' }} = {{ (item.producto.precio * item.cantidad) | currency:'S/ ' }}</span>
+            <span>x {{ item.producto.precioUnitario | currency:'S/ ' }} = {{ (item.producto.precioUnitario * item.cantidad) | currency:'S/ ' }}</span>
             <button (click)="eliminarProducto(item.producto.id)" class="delete-btn">&times;</button>
           </div>
         </div>
@@ -46,6 +48,38 @@ import { Producto, Venta, Usuario } from '../../../models/types';
           <strong>Total: {{ totalPedido | currency:'S/ ' }}</strong>
         </div>
       </div>
+
+      <!-- Sección para Fórmulas Magistrales -->
+      <div class="formula-section">
+        <h5>Añadir Fórmula Magistral (Opcional)</h5>
+        <div class="form-group">
+          <input type="text" [(ngModel)]="formulaActual.nombre" placeholder="Nombre de la fórmula">
+        </div>
+        <div class="form-group">
+          <textarea [(ngModel)]="formulaActual.composicion" placeholder="Composición..."></textarea>
+        </div>
+        <div class="form-group">
+          <textarea [(ngModel)]="formulaActual.procedimiento" placeholder="Procedimiento..."></textarea>
+        </div>
+        <div class="form-group formula-price">
+          <label for="formula-precio">Precio:</label>
+          <input type="number" id="formula-precio" [(ngModel)]="formulaActual.precio" placeholder="0.00">
+          <button type="button" (click)="agregarFormula()" [disabled]="!formulaActual.nombre || formulaActual.precio <= 0" class="add-formula-btn">Añadir Fórmula</button>
+        </div>
+      </div>
+
+      <!-- Fórmulas en el Pedido -->
+      <div *ngIf="formulasEnPedido.length > 0" class="pedido-items">
+        <h5>Fórmulas en el pedido:</h5>
+        <div *ngFor="let formula of formulasEnPedido" class="pedido-item">
+          <span>{{ formula.nombre }}</span>
+          <div class="item-controls">
+            <span>{{ formula.precio | currency:'S/ ' }}</span>
+            <button (click)="eliminarFormula(formula.id)" class="delete-btn">&times;</button>
+          </div>
+        </div>
+      </div>
+
 
       <!-- Datos del Cliente y Acciones -->
       <div *ngIf="pedidoActual.length > 0" class="form-group">
@@ -58,7 +92,7 @@ import { Producto, Venta, Usuario } from '../../../models/types';
         <button 
           (click)="generarOrden()" 
           class="submit-btn" 
-          [disabled]="procesandoPedido || pedidoActual.length === 0 || !clienteNombre.trim()">
+          [disabled]="procesandoPedido || (pedidoActual.length === 0 && formulasEnPedido.length === 0) || !clienteNombre.trim()">
           {{ procesandoPedido ? 'Generando...' : 'Generar Orden de Venta' }}
         </button>
       </div>
@@ -84,6 +118,10 @@ import { Producto, Venta, Usuario } from '../../../models/types';
     .submit-btn { background: #28a745; color: white; }
     .acciones button { border: none; padding: 0.7rem 1.2rem; border-radius: 6px; font-weight: 600; cursor: pointer; }
     .acciones button:disabled { background: #adb5bd; }
+    .formula-section { border-top: 2px solid #0056b3; margin-top: 2rem; padding-top: 1.5rem; }
+    .formula-section h5 { margin-bottom: 1rem; }
+    .formula-price { display: flex; align-items: center; gap: 1rem; }
+    .add-formula-btn { background-color: #0056b3; color: white; border: none; padding: 0.75rem; border-radius: 6px; cursor: pointer; }
     .animate-fade-in { animation: fadeIn 0.5s ease-in-out; }
     @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
   `]
@@ -96,30 +134,34 @@ export class NuevoPedidoComponent implements OnInit {
   private ventaService = inject(VentaService);
   private authService = inject(AuthService);
 
+  private searchTerms = new Subject<string>();
   usuario: Usuario | null = null;
   productosDisponibles: Producto[] = [];
   terminoBusquedaProducto = '';
   productosFiltrados: Producto[] = [];
   pedidoActual: { producto: Producto, cantidad: number }[] = [];
+  formulasEnPedido: FormulaMagistral[] = [];
+  formulaActual: { nombre: string, composicion: string, procedimiento: string, precio: number } = { nombre: '', composicion: '', procedimiento: '', precio: 0 };
   clienteNombre = '';
   totalPedido = 0;
   procesandoPedido = false;
 
   ngOnInit(): void {
     this.usuario = this.authService.obtenerUsuarioActual();
-    this.productoService.getProductos().subscribe(productos => {
-      this.productosDisponibles = productos;
+    
+    // Configura la búsqueda reactiva con debounce
+    this.searchTerms.pipe(
+      debounceTime(300), // Espera 300ms después de la última pulsación
+      distinctUntilChanged(), // Ignora si el término de búsqueda es el mismo
+      // Cambia a una nueva búsqueda cada vez que el término cambia
+      switchMap((term: string) => this.productoService.buscarProductosParaVenta(term)),
+    ).subscribe((productos: Producto[]) => {
+      this.productosFiltrados = productos;
     });
   }
 
   buscarProducto(): void {
-    if (!this.terminoBusquedaProducto.trim()) {
-      this.productosFiltrados = [];
-      return;
-    }
-    this.productosFiltrados = this.productosDisponibles.filter(p => 
-      p.nombre.toLowerCase().includes(this.terminoBusquedaProducto.toLowerCase()) && p.stock > 0
-    ).slice(0, 5);
+    this.searchTerms.next(this.terminoBusquedaProducto);
   }
 
   agregarProducto(producto: Producto): void {
@@ -150,12 +192,36 @@ export class NuevoPedidoComponent implements OnInit {
     this.calcularTotal();
   }
 
+  agregarFormula(): void {
+    if (!this.formulaActual.nombre || !this.formulaActual.composicion || this.formulaActual.precio <= 0) {
+      // Podrías mostrar un error al usuario
+      return;
+    }
+    const nuevaFormula: FormulaMagistral = {
+      id: `temp-${Date.now()}`, // ID temporal para el frontend
+      ...this.formulaActual
+    };
+    this.formulasEnPedido.push(nuevaFormula);
+    // Resetear el formulario de la fórmula
+    this.formulaActual = { nombre: '', composicion: '', procedimiento: '', precio: 0 };
+    this.calcularTotal();
+  }
+
+  eliminarFormula(formulaId: string): void {
+    this.formulasEnPedido = this.formulasEnPedido.filter(f => f.id !== formulaId);
+    this.calcularTotal();
+  }
+
   calcularTotal(): void {
-    this.totalPedido = this.pedidoActual.reduce((total, item) => total + (item.producto.precio * item.cantidad), 0);
+    const totalProductos = this.pedidoActual.reduce((total, item) => total + (item.producto.precioUnitario * item.cantidad), 0);
+    const totalFormulas = this.formulasEnPedido.reduce((total, formula) => total + formula.precio, 0);
+    this.totalPedido = totalProductos + totalFormulas;
   }
 
   generarOrden(): void {
-    if (this.pedidoActual.length === 0 || !this.clienteNombre.trim() || !this.usuario) return;
+    if ((this.pedidoActual.length === 0 && this.formulasEnPedido.length === 0) || !this.clienteNombre.trim() || !this.usuario) {
+      return;
+    }
     
     this.procesandoPedido = true;
     const nuevaVenta = {
@@ -165,13 +231,16 @@ export class NuevoPedidoComponent implements OnInit {
         productoId: item.producto.id,
         nombreProducto: item.producto.nombre,
         cantidad: item.cantidad,
-        precioUnitario: item.producto.precio,
-        subtotal: item.producto.precio * item.cantidad
+        precioUnitario: item.producto.precioUnitario,
+        subtotal: item.producto.precioUnitario * item.cantidad
       })),
-      total: this.totalPedido
+      itemsFormula: this.formulasEnPedido,
+      total: this.totalPedido,
+      // Se añade el estado inicial para que el objeto cumpla con la interfaz Venta
+      estado: 'PENDIENTE_PAGO'
     };
 
-    this.ventaService.crearVenta(nuevaVenta).subscribe(ventaGenerada => {
+    this.ventaService.crearVenta(nuevaVenta as any).subscribe((ventaGenerada: Venta) => {
       this.procesandoPedido = false;
       this.pedidoGenerado.emit(ventaGenerada);
     });

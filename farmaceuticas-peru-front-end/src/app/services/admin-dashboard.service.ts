@@ -2,13 +2,14 @@ import { Injectable, inject } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
 import { AdminStats, ActividadReciente } from '../models/types';
+import { environment } from '../../environments/environment';
 
 @Injectable({
   providedIn: 'root'
 })
 export class AdminDashboardService {
   private http = inject(HttpClient);
-  private apiUrl = '/api/admin/dashboard';
+  private apiUrl = `${environment.apiUrl}/admin/dashboard`;
 
   getStats(): Observable<AdminStats> {
     return this.http.get<AdminStats>(`${this.apiUrl}/stats`);

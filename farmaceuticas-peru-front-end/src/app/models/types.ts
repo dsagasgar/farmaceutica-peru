@@ -6,7 +6,7 @@ export interface Usuario {
   id: string;
   email: string;
   nombre: string;
-  rol: 'administrador' | 'cajero' | 'almacen' | 'quimico';
+  rol: 'ADMINISTRADOR' | 'CAJERO' | 'ALMACENERO' | 'QUIMICO_FARMACEUTICO';
   password?: string; // Se usa solo en login, luego se descarta
 }
 
@@ -40,7 +40,7 @@ export interface Venta {
   quimicoId: string; // ID del QF que generó la orden
   cajeroId?: string; // ID del cajero que procesó el pago
   clienteNombre?: string; // Nombre del cliente para la boleta/factura
-  status: 'PENDIENTE_PAGO' | 'PAGADO' | 'ENVIADO' | 'ENTREGADO';
+  estado: 'PENDIENTE_PAGO' | 'PAGADO' | 'ENVIADO' | 'ENTREGADO';
 }
 
 export interface FormulaMagistral {
@@ -67,7 +67,7 @@ export interface CompraProveedor {
   fechaRecepcion?: Date;
   items: ItemCompra[];
   total: number;
-  status: 'PENDIENTE_RECEPCION' | 'EN_VERIFICACION' | 'CON_OBSERVACIONES' | 'PAGADO' | 'CANCELADO';
+  estado: 'PENDIENTE_RECEPCION' | 'EN_VERIFICACION' | 'RECIBIDO_CON_OBSERVACIONES' | 'RECIBIDO_OK' | 'PAGADO' | 'CANCELADO';
   observacionesAlmacen?: string;
 }
 

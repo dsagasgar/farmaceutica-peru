@@ -3,15 +3,18 @@ package com.farmaceuticas_peru.back_end.service;
 import java.util.Collections;
 import java.util.List;
 
-import org.springframework.security.authentication.BadCredentialsException;
-import org.springframework.security.core.userdetails.UsernameNotFoundException;
+import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.Authentication;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
+import com.farmaceuticas_peru.back_end.dto.AuthResponse;
 import com.farmaceuticas_peru.back_end.dto.AuthResponseDTO;
 import com.farmaceuticas_peru.back_end.dto.LoginRequestDTO;
 import com.farmaceuticas_peru.back_end.dto.PersonaRequest;
 import com.farmaceuticas_peru.back_end.dto.RegisterRequestDTO;
+import com.farmaceuticas_peru.back_end.dto.UserDTO;
 import com.farmaceuticas_peru.back_end.model.Modulo;
 import com.farmaceuticas_peru.back_end.model.Persona;
 import com.farmaceuticas_peru.back_end.model.Usuario;
@@ -26,6 +29,7 @@ import lombok.RequiredArgsConstructor;
 @Service
 @RequiredArgsConstructor
 public class AuthService {
+    private final AuthenticationManager authenticationManager;
     private final UsuarioRepository usuarioRepository;
     private final PersonaRepository personaRepository;
     private final ModuloRepository moduloRepository;
@@ -64,12 +68,12 @@ public class AuthService {
     }
 
     // You have an existing account and want to log in 
-    public AuthResponseDTO login(LoginRequestDTO request) {
-        var usuario = usuarioRepository.findByEmail(request.getEmail())
-                .orElseThrow(() -> new UsernameNotFoundException("Email no encontrado"));
-
-        if(!passwordEncoder.matches(request.getPassword(), usuario.getPasswordHash()))
-            throw new BadCredentialsException("Contraseña incorrecta");
+    public AuthResponse login(LoginRequestDTO request) {
+        Authentication authentication = authenticationManager.authenticate(
+            new UsernamePasswordAuthenticationToken(request.getEmail(), request.getPassword())
+        );
+        
+        final Usuario usuario = (Usuario) authentication.getPrincipal();
 
         List<Modulo> modules = Collections.emptyList();
         
@@ -79,8 +83,7 @@ public class AuthService {
 
         var token = jwtService.generateToken(usuario, modules);
         
-        return AuthResponseDTO.builder()
-                .token(token)
-                .build();
+        final UserDTO userDto = UserDTO.fromEntity(usuario);
+        return new AuthResponse(token, userDto);
     }
 }

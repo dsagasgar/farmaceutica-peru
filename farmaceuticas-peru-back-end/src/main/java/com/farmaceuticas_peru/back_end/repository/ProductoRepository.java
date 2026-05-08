@@ -9,13 +9,12 @@ import com.farmaceuticas_peru.back_end.model.Producto;
 
 @Repository
 public interface ProductoRepository extends JpaRepository<Producto, String> {
-
-    // Búsqueda para Almacenero/Admin: encuentra por nombre en todos los productos.
+    // Busca productos cuyo nombre contenga el término de búsqueda, ignorando mayúsculas/minúsculas
     List<Producto> findByNombreContainingIgnoreCase(String nombre);
 
-    // Búsqueda para QF: encuentra por nombre solo en productos con stock para venta.
-    List<Producto> findByNombreContainingIgnoreCaseAndStockVentaGreaterThan(String nombre, int stock);
-
-    // Búsqueda para QF: encuentra todos los productos con stock para venta.
+    // Busca productos con stock para venta mayor a un valor
     List<Producto> findByStockVentaGreaterThan(int stock);
+
+    // Busca productos por nombre y con stock para venta mayor a un valor
+    List<Producto> findByNombreContainingIgnoreCaseAndStockVentaGreaterThan(String nombre, int stock);
 }

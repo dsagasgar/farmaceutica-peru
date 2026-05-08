@@ -1,0 +1,8 @@
+package com.farmaceuticas_peru.back_end.dto;
+
+import lombok.Data;
+
+@Data
+public class StockVentaRequest {
+    private Integer stockVenta;
+}

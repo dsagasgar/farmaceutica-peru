@@ -83,13 +83,13 @@ import { Usuario, Venta } from '../../../models/types';
                   </tfoot>
                 </table>
                 
-                <div *ngIf="ordenSeleccionada.status === 'PENDIENTE_PAGO'" class="acciones-pago">
+                <div *ngIf="ordenSeleccionada.estado === 'PENDIENTE_PAGO'" class="acciones-pago">
                   <button class="pagar-btn" (click)="registrarPago()" [disabled]="procesandoPago">
                     {{ procesandoPago ? 'Procesando...' : 'Registrar Pago y Emitir Comprobante' }}
                   </button>
                 </div>
                 
-                <div *ngIf="ordenSeleccionada.status === 'PAGADO'" class="pago-confirmado">
+                <div *ngIf="ordenSeleccionada.estado === 'PAGADO'" class="pago-confirmado">
                   <p>✅ Pago registrado exitosamente por el usuario {{ usuario?.nombre }}.</p>
                   <button class="imprimir-btn">Imprimir Boleta</button>
                   <button class="imprimir-btn">Imprimir Factura</button>
@@ -108,15 +108,6 @@ import { Usuario, Venta } from '../../../models/types';
           <div class="section-content placeholder">
             <p>Aquí irá la funcionalidad para verificar y despachar pedidos en línea.</p>
             <button class="action-btn" disabled>Ver Pedidos Pendientes</button>
-          </div>
-        </section>
-
-        <section class="dashboard-section">
-          <h2 class="section-title">Informes de Caja</h2>
-          <p class="section-description">Genere y emita informes de ventas y cierres de caja.</p>
-          <div class="section-content placeholder">
-            <p>Aquí irá la funcionalidad para emitir informes.</p>
-            <button class="action-btn" disabled>Generar Informe de Ventas</button>
           </div>
         </section>
       </main>

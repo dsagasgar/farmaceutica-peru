@@ -13,6 +13,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.farmaceuticas_peru.back_end.dto.StockVentaRequest;
 import com.farmaceuticas_peru.back_end.model.Producto;
 import com.farmaceuticas_peru.back_end.service.ProductoService;
 
@@ -23,25 +24,27 @@ public class ProductoController {
     @Autowired
     private ProductoService productoService;
 
-    // Endpoint para Almacenero y Administrador
-    @GetMapping("/almacen")
-    @PreAuthorize("hasAnyRole('ADMINISTRADOR', 'ALMACENERO')")
-    public List<Producto> getProductosAlmacen(@RequestParam(required = false) String nombre) {
-        return productoService.getProductosParaAlmacen(nombre);
-    }
-
-    // Endpoint para Químico Farmacéutico 
+    // Endpoint para que el QF busque productos con stock para vender
     @GetMapping("/venta")
     @PreAuthorize("hasAnyRole('QUIMICO_FARMACEUTICO', 'ADMINISTRADOR')")
-    public List<Producto> getProductosVenta(@RequestParam(required = false) String nombre) {
-        return productoService.getProductosParaVenta(nombre);
+    public ResponseEntity<List<Producto>> getProductosParaVenta(@RequestParam(required = false) String nombre) {
+        List<Producto> productos = productoService.getProductosParaVenta(nombre);
+        return ResponseEntity.ok(productos);
     }
 
-    // Endpoint para que el Almacenero actualice el stock
+    // Endpoint para que el Almacenero y Admin vean TODOS los productos
+    @GetMapping("/almacen")
+    @PreAuthorize("hasAnyRole('ALMACENERO', 'ADMINISTRADOR')")
+    public ResponseEntity<List<Producto>> getProductosParaAlmacen(@RequestParam(required = false) String nombre) {
+        List<Producto> productos = productoService.getProductosParaAlmacen(nombre);
+        return ResponseEntity.ok(productos);
+    }
+
+    // Endpoint para que el Almacenero actualice el stock de venta
     @PutMapping("/{id}/stock-venta")
-    @PreAuthorize("hasRole('ALMACENERO')")
-    public ResponseEntity<Producto> updateStockVenta(@PathVariable String id, @RequestBody Integer nuevoStockVenta) {
-        Producto productoActualizado = productoService.actualizarStockVenta(id, nuevoStockVenta);
+    @PreAuthorize("hasAnyRole('ALMACENERO', 'ADMINISTRADOR')")
+    public ResponseEntity<Producto> actualizarStockVenta(@PathVariable String id, @RequestBody StockVentaRequest stockVentaRequest) {
+        Producto productoActualizado = productoService.actualizarStockVenta(id, stockVentaRequest.getStockVenta());
         return ResponseEntity.ok(productoActualizado);
     }
 }
