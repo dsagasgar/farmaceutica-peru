@@ -17,7 +17,10 @@
     "@angular/forms": "^21.2.0",
     "@angular/platform-browser": "^21.2.0",
     "@angular/router": "^21.2.0",
+<<<<<<< HEAD
     "ngx-pagination": "^6.0.3",
+=======
+>>>>>>> 47604d8edd03a1fe6b2f9de2ae829b06998cc97b
     "rxjs": "~7.8.0",
     "tslib": "^2.3.0"
   },
@@ -30,4 +33,8 @@
     "typescript": "~5.9.2",
     "vitest": "^4.0.8"
   }
+<<<<<<< HEAD
 }
+=======
+}
+>>>>>>> 47604d8edd03a1fe6b2f9de2ae829b06998cc97b
