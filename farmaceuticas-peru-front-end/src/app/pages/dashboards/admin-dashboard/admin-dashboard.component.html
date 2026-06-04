@@ -1,0 +1,73 @@
+<div class="dashboard-container">
+  <!-- ENCABEZADO -->
+  <header class="dashboard-header">
+    <div class="header-top">
+      <h1>Panel de Administrador</h1>
+      <div class="user-info">
+        <span class="user-name">{{ usuario?.nombre }}</span>
+        <span class="user-role">{{ usuario?.rol | uppercase }}</span>
+        <button (click)="logout()" class="logout-btn">Cerrar Sesión</button>
+      </div>
+    </div>
+  </header>
+
+  <!-- CONTENIDO PRINCIPAL -->
+  <main class="dashboard-main">
+    <!-- ESTADÍSTICAS (Ahora dinámicas con el pipe async) -->
+    <ng-container *ngIf="stats$ | async as stats; else loadingStats">
+      <section class="stats-section">
+        <h2>Estadísticas del Sistema</h2>
+        <div class="stats-grid">
+          <div class="stat-card">
+            <div class="stat-content">
+              <p class="stat-label">Total Usuarios</p>
+              <p class="stat-value">{{ stats.totalUsuarios }}</p>
+            </div>
+          </div>
+
+          <div class="stat-card">
+            <div class="stat-content">
+              <p class="stat-label">Ingresos de Hoy</p>
+              <p class="stat-value">{{ stats.ingresosHoy | currency:'S/ ' }}</p>
+            </div>
+          </div>
+
+          <div class="stat-card">
+            <div class="stat-content">
+              <p class="stat-label">Total Productos</p>
+              <p class="stat-value">{{ stats.totalProductos }}</p>
+            </div>
+          </div>
+
+          <div class="stat-card">
+            <div class="stat-content">
+              <p class="stat-label">Ventas de Hoy</p>
+              <p class="stat-value">{{ stats.ventasHoy }}</p>
+            </div>
+          </div>
+        </div>
+      </section>
+    </ng-container>
+
+    <ng-container *ngIf="actividadReciente$ | async as actividades; else loadingActivity">
+      <section class="activity-section">
+        <h2>Actividad Reciente</h2>
+        <div class="activity-list">
+          <div *ngFor="let item of actividades" class="activity-item">
+            <p class="activity-title">{{ item.descripcion }}</p>
+            <p class="activity-time">{{ item.fecha | date:'medium' }}</p>
+          </div>
+          <div *ngIf="actividades.length === 0" class="no-activity">No hay actividad reciente.</div>
+        </div>
+      </section>
+    </ng-container>
+
+    <!-- TEMPLATES DE CARGA -->
+    <ng-template #loadingStats>
+      <div class="placeholder">Cargando estadísticas...</div>
+    </ng-template>
+    <ng-template #loadingActivity>
+      <div class="placeholder">Cargando actividad reciente...</div>
+    </ng-template>
+  </main>
+</div>

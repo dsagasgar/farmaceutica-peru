@@ -1,0 +1,91 @@
+<div class="dashboard-container">
+  <header class="dashboard-header">
+    <div class="header-content">
+      <h1>Panel del Cajero</h1>
+      <div class="user-info">
+        <span class="user-name">{{ usuario?.nombre }}</span>
+        <span class="user-role">{{ usuario?.rol | uppercase }}</span>
+        <button (click)="logout()" class="logout-btn">Cerrar Sesión</button>
+      </div>
+    </div>
+  </header>
+
+  <main class="dashboard-main">
+    <!-- HU1: Registrar Orden de Venta -->
+    <section class="dashboard-section">
+      <h2 class="section-title">Registrar Pago de Orden</h2>
+      <p class="section-description">
+        Busque una orden de venta por su ID para registrar el pago y emitir el comprobante.
+      </p>
+      <div class="section-content">
+        <div class="orden-venta-container">
+          <!-- Paso 1: Buscador de Orden -->
+          <div class="buscador-orden">
+            <label for="ordenId">ID de la Orden de Venta:</label>
+            <div class="input-group">
+              <input 
+                type="text" 
+                id="ordenId" 
+                [(ngModel)]="ordenIdBusqueda"
+                placeholder="Ej: OV-2024-001"
+                (keyup.enter)="buscarOrden()"
+                [disabled]="buscando"
+              >
+              <button (click)="buscarOrden()" [disabled]="buscando || !ordenIdBusqueda">
+                {{ buscando ? 'Buscando...' : 'Buscar' }}
+              </button>
+            </div>
+            <div *ngIf="errorBusqueda" class="error-msg">{{ errorBusqueda }}</div>
+          </div>
+
+          <!-- Paso 2: Detalles de la Orden y Pago -->
+          <div *ngIf="ordenSeleccionada" class="detalle-orden animate-fade-in">
+            <h3>Detalles de la Orden: {{ ordenSeleccionada.id }}</h3>
+            <div class="info-cliente">
+              <span><strong>Cliente:</strong> {{ ordenSeleccionada.clienteNombre || 'N/A' }}</span>
+              <span><strong>Fecha:</strong> {{ ordenSeleccionada.fecha | date:'dd/MM/yyyy HH:mm' }}</span>
+            </div>
+            <table class="items-table">
+              <thead>
+                <tr>
+                  <th>Producto</th>
+                  <th>Cantidad</th>
+                  <th>P. Unit.</th>
+                  <th>Subtotal</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr *ngFor="let item of ordenSeleccionada.items">
+                  <td>{{ item.nombreProducto }}</td>
+                  <td>{{ item.cantidad }}</td>
+                  <td>{{ item.precioUnitario | currency:'S/ ' }}</td>
+                  <td>{{ item.subtotal | currency:'S/ ' }}</td>
+                </tr>
+              </tbody>
+              <tfoot>
+                <tr>
+                  <td colspan="3">Total a Pagar</td>
+                  <td>{{ ordenSeleccionada.total | currency:'S/ ' }}</td>
+                </tr>
+              </tfoot>
+            </table>
+            
+            <div *ngIf="ordenSeleccionada.estado === 'PENDIENTE_PAGO'" class="acciones-pago">
+              <button class="pagar-btn" (click)="registrarPago()" [disabled]="procesandoPago">
+                {{ procesandoPago ? 'Procesando...' : 'Registrar Pago y Emitir Comprobante' }}
+              </button>
+            </div>
+            
+            <div *ngIf="ordenSeleccionada.estado === 'PAGADO'" class="pago-confirmado">
+              <p>✅ Pago registrado exitosamente por el usuario {{ usuario?.nombre }}.</p>
+              <button class="imprimir-btn">Imprimir Boleta</button>
+              <button class="imprimir-btn">Imprimir Factura</button>
+            </div>
+            
+            <div *ngIf="errorPago" class="error-msg">{{ errorPago }}</div>
+          </div>
+        </div>
+      </div>
+    </section>
+  </main>
+</div>

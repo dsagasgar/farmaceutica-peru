@@ -1,0 +1,45 @@
+<div class="catalogo-container">
+  <div class="search-bar">
+    <input 
+      type="text" 
+      placeholder="Buscar producto por nombre..."
+      [(ngModel)]="terminoBusquedaModel"
+      (ngModelChange)="onBusqueda()"
+    />
+  </div>
+
+  <div class="table-wrapper">
+    <table class="product-table">
+      <thead>
+        <tr>
+          <th>Nombre</th>
+          <th>Categoría</th>
+          <th>Marca</th>
+          <th>Precio Unit.</th>
+          <th>Stock Disponible</th>
+        </tr>
+      </thead>
+      <tbody>
+        <ng-container *ngIf="productos$ | async as productos; else loading">
+          <tr *ngFor="let producto of productos">
+            <td>{{ producto.nombre }}</td>
+            <td>{{ producto.categoria }}</td>
+            <td>{{ producto.marca }}</td>
+            <td>{{ producto.precioUnitario | currency:'S/ ' }}</td>
+            <td>{{ producto.stockVenta }}</td>
+          </tr>
+          <tr *ngIf="productos.length === 0">
+            <td colspan="5" class="no-results">No se encontraron productos.</td>
+          </tr>
+        </ng-container>
+      </tbody>
+    </table>
+    <ng-template #loading>
+      <tbody>
+        <tr>
+          <td colspan="5" class="loading-state">Cargando productos...</td>
+        </tr>
+      </tbody>
+    </ng-template>
+  </div>
+</div>

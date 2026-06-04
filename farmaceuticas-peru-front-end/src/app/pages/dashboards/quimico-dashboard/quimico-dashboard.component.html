@@ -1,0 +1,48 @@
+<div class="dashboard-container">
+  <header class="dashboard-header">
+    <div class="header-content">
+      <h1>Panel del Químico Farmacéutico</h1>
+      <div class="user-info">
+        <span class="user-name">{{ usuario?.nombre }}</span>
+        <span class="user-role">{{ usuario?.rol | uppercase }}</span>
+        <button (click)="logout()" class="logout-btn">Cerrar Sesión</button>
+      </div>
+    </div>
+  </header>
+
+  <main class="dashboard-main">
+    <section class="dashboard-section">
+      <h2 class="section-title">Consulta de Productos</h2>
+      <p class="section-description">
+        Busque productos en el inventario para ver detalles, stock y precios.
+      </p>
+      <div class="section-content">
+        <app-catalogo-productos></app-catalogo-productos>
+      </div>
+    </section>
+
+    <section class="dashboard-section">
+      <h2 class="section-title">Nuevo Pedido</h2>
+      <p class="section-description">
+        Tome nota de los productos para un cliente y genere una orden de venta.
+      </p>
+      <div class="section-content">
+        <div *ngIf="!mostrandoFormularioPedido">
+          <button class="action-btn" (click)="iniciarNuevoPedido()">Iniciar Nuevo Pedido</button>
+          
+          <div *ngIf="ordenGenerada" class="orden-generada-info animate-fade-in">
+            <p><strong>¡Orden generada con éxito!</strong></p>
+            <p>Entregue el siguiente ID al cliente para que realice el pago en caja:</p>
+            <div class="orden-id">{{ ordenGenerada.id }}</div>
+          </div>
+        </div>
+
+        <app-nuevo-pedido 
+          *ngIf="mostrandoFormularioPedido"
+          (pedidoGenerado)="onPedidoGenerado($event)"
+          (cancelar)="onCancelarPedido()">
+        </app-nuevo-pedido>
+      </div>
+    </section>
+  </main>
+</div>
