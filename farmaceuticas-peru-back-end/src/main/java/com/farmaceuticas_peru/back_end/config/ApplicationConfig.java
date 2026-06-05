@@ -23,7 +23,6 @@ public class ApplicationConfig {
 
     @Bean
     public UserDetailsService userDetailsService() {
-        // Define cómo buscar un usuario por su email (o username)
         return username -> usuarioRepository.findByEmail(username)
                 .orElseThrow(() -> new UsernameNotFoundException("Usuario no encontrado con email: " + username));
     }
@@ -43,7 +42,6 @@ public class ApplicationConfig {
 
     @Bean
     public PasswordEncoder passwordEncoder() {
-        // Define el codificador para las contraseñas
         return new BCryptPasswordEncoder();
     }
 }
