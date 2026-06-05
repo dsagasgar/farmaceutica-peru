@@ -9,22 +9,21 @@ import { environment } from '../../environments/environment';
 })
 export class VentaService {
   private http = inject(HttpClient);
-  private apiUrl = `${environment.apiUrl}/ventas`;
+  // 1. CORREGIDO: Se añade /api para mapear el @RequestMapping del controlador
+  private apiUrl = `${environment.apiUrl}/api/ventas`; 
 
-  constructor() { }
-
-  buscarOrdenPorId(id: string): Observable<Venta | undefined> {
+  // 2. CORREGIDO: Retorna directamente un Observable<Venta>
+  buscarOrdenPorId(id: string): Observable<Venta> {
     return this.http.get<Venta>(`${this.apiUrl}/${id}`);
   }
 
   registrarPago(id: string, cajeroId: string): Observable<Venta> {
     const payload = { cajeroId };
-    // Se ajusta el método a PUT y la URL al endpoint correcto del backend.
     return this.http.put<Venta>(`${this.apiUrl}/${id}/registrar-pago`, payload);
   }
 
-  crearVenta(nuevaVenta: Omit<Venta, 'id' | 'fecha' | 'status'>): Observable<Venta> {
-    // El backend se encargará de generar el ID, la fecha y el estado inicial.
+  // 3. CORREGIDO: Se cambia 'status' por 'estado' para reflejar el modelo de Spring Boot
+  crearVenta(nuevaVenta: Omit<Venta, 'id' | 'fecha' | 'estado'>): Observable<Venta> {
     return this.http.post<Venta>(this.apiUrl, nuevaVenta);
   }
 }

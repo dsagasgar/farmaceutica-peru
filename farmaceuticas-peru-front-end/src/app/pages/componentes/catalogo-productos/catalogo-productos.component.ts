@@ -10,83 +10,8 @@ import { debounceTime, distinctUntilChanged, switchMap, startWith } from 'rxjs/o
   selector: 'app-catalogo-productos',
   standalone: true,
   imports: [CommonModule, FormsModule],
-  template: `
-    <div class="catalogo-container">
-      <div class="search-bar">
-        <input 
-          type="text" 
-          placeholder="Buscar producto por nombre..."
-          [(ngModel)]="terminoBusquedaModel"
-          (ngModelChange)="onBusqueda()"
-        />
-      </div>
-
-      <div class="table-wrapper">
-        <table class="product-table">
-          <thead>
-            <tr>
-              <th>Nombre</th>
-              <th>Categoría</th>
-              <th>Marca</th>
-              <th>Precio Unit.</th>
-              <th>Stock Disponible</th>
-            </tr>
-          </thead>
-          <tbody>
-            <ng-container *ngIf="productos$ | async as productos; else loading">
-              <tr *ngFor="let producto of productos">
-                <td>{{ producto.nombre }}</td>
-                <td>{{ producto.categoria }}</td>
-                <td>{{ producto.marca }}</td>
-                <td>{{ producto.precioUnitario | currency:'S/ ' }}</td>
-                <td>{{ producto.stockVenta }}</td>
-              </tr>
-              <tr *ngIf="productos.length === 0">
-                <td colspan="5" class="no-results">No se encontraron productos.</td>
-              </tr>
-            </ng-container>
-          </tbody>
-        </table>
-        <ng-template #loading>
-          <tbody>
-            <tr>
-              <td colspan="5" class="loading-state">Cargando productos...</td>
-            </tr>
-          </tbody>
-        </ng-template>
-      </div>
-    </div>
-  `,
-  styles: [`
-    .catalogo-container { padding: 1rem; background-color: #f8f9fa; border-radius: 6px; }
-    .search-bar { margin-bottom: 1rem; }
-    .search-bar input {
-      width: 100%;
-      padding: 0.75rem;
-      font-size: 1rem;
-      border: 1px solid #ced4da;
-      border-radius: 6px;
-    }
-    .table-wrapper { overflow-x: auto; }
-    .product-table {
-      width: 100%;
-      border-collapse: collapse;
-      background-color: white;
-    }
-    .product-table th, .product-table td {
-      padding: 0.75rem 1rem;
-      border-bottom: 1px solid #dee2e6;
-      text-align: left;
-      vertical-align: middle;
-    }
-    .product-table thead th {
-      background-color: #e9ecef;
-      font-weight: 600;
-      color: #495057;
-      font-size: 0.9rem;
-    }
-    .no-results, .loading-state { text-align: center; padding: 2rem; color: #6c757d; }
-  `]
+  templateUrl: './catalogo-productos.component.html',
+  styleUrl: './catalogo-productos.component.css'
 })
 export class CatalogoProductosComponent implements OnInit {
   private productoService = inject(ProductoService);
