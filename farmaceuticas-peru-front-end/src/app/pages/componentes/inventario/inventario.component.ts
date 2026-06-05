@@ -19,10 +19,6 @@ interface ProductoInventario {
   selector: 'app-inventario',
   standalone: true,
   imports: [CommonModule, FormsModule],
-<<<<<<< HEAD
-  templateUrl: './inventario.component.html',
-  styleUrl: './inventario.component.css'
-=======
   template: `
     <div class="inventario-container">
       <div class="header">
@@ -511,7 +507,6 @@ interface ProductoInventario {
       }
     }
   `]
->>>>>>> 47604d8edd03a1fe6b2f9de2ae829b06998cc97b
 })
 export class InventarioComponent {
   productos: ProductoInventario[] = [

@@ -10,10 +10,6 @@ import { Usuario, Venta } from '../../../models/types';
   selector: 'app-cajero-dashboard',
   standalone: true,
   imports: [CommonModule, FormsModule],
-<<<<<<< HEAD
-  templateUrl: './cajero-dashboard.component.html',
-  styleUrl: './cajero-dashboard.component.css'
-=======
   template: `
     <div class="dashboard-container">
       <header class="dashboard-header">
@@ -150,7 +146,6 @@ import { Usuario, Venta } from '../../../models/types';
     .pago-confirmado p { margin: 0 0 1rem 0; font-weight: 600; }
     .imprimir-btn { background-color: #17a2b8; color: white; border: none; padding: 0.6rem 1rem; border-radius: 6px; cursor: pointer; margin: 0 0.5rem; }
   `]
->>>>>>> 47604d8edd03a1fe6b2f9de2ae829b06998cc97b
 })
 export class CajeroDashboardComponent {
   private authService = inject(AuthService);

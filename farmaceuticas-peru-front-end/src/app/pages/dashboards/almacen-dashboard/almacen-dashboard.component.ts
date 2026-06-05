@@ -15,11 +15,7 @@ import { ProductoService } from '../../../services/producto.service';
 @Component({
   selector: 'app-almacen-dashboard',
   standalone: true,
-  imports: [CommonModule, FormsModule], // Importamos CatalogoProductosComponent para usarlo
-<<<<<<< HEAD
-  templateUrl: './almacen-dashboard.component.html',
-  styleUrl: './almacen-dashboard.component.css'
-=======
+  imports: [CommonModule, FormsModule],
   template: `
     <!-- 1. ESTRUCTURA HTML: Define la vista del componente -->
     <div class="dashboard-container">
@@ -211,7 +207,6 @@ import { ProductoService } from '../../../services/producto.service';
       padding: 0.4rem 0.8rem; border-radius: 4px; cursor: pointer;
     }
   `]
->>>>>>> 47604d8edd03a1fe6b2f9de2ae829b06998cc97b
 })
 // 3. LÓGICA TYPESCRIPT: Define el comportamiento del componente.
 export class AlmacenDashboardComponent implements OnInit {

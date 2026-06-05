@@ -10,10 +10,6 @@ import { Observable } from 'rxjs';
   selector: 'app-admin-dashboard',
   standalone: true, // RouterModule es necesario para los botones con [routerLink]
   imports: [CommonModule, RouterModule],
-<<<<<<< HEAD
-  templateUrl: './admin-dashboard.component.html',
-  styleUrl: './admin-dashboard.component.css'
-=======
   template: `
     <div class="dashboard-container">
       <!-- ENCABEZADO -->
@@ -310,7 +306,6 @@ import { Observable } from 'rxjs';
       }
     }
   `]
->>>>>>> 47604d8edd03a1fe6b2f9de2ae829b06998cc97b
 })
 export class AdminDashboardComponent implements OnInit {
   // Inyección de dependencias moderna con inject()

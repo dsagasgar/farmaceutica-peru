@@ -14,10 +14,6 @@ interface ItemOrden {
   selector: 'app-register-venta',
   standalone: true,
   imports: [CommonModule, FormsModule],
-<<<<<<< HEAD
-  templateUrl: './registro-venta.component.html',
-  styleUrl: './registro-venta.component.css'
-=======
   template: `
     <div class="register-venta-container">
       <div class="header">
@@ -396,7 +392,6 @@ interface ItemOrden {
       }
     }
   `]
->>>>>>> 47604d8edd03a1fe6b2f9de2ae829b06998cc97b
 })
 export class RegisterVentaComponent {
   ticketNumber = Math.random().toString().substring(7, 12).toUpperCase();

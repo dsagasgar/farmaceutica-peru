@@ -13,10 +13,11 @@ public class WebConfig {
         return new WebMvcConfigurer() {
             @Override
             public void addCorsMappings(CorsRegistry registry) {
-                registry.addMapping("/api/**") // Aplica CORS a todos los endpoints bajo /api
-                        .allowedOrigins("http://localhost:4200") // Permite peticiones desde el frontend de Angular
-                        .allowedMethods("GET", "POST", "PUT", "DELETE", "OPTIONS") // Métodos HTTP permitidos
-                        .allowedHeaders("*"); // Permite todas las cabeceras (como Authorization)
+                registry.addMapping("/**") 
+                        .allowedOrigins("http://localhost", "http://localhost:80", "http://localhost:4200") 
+                        .allowedMethods("GET", "POST", "PUT", "DELETE", "OPTIONS") 
+                        .allowedHeaders("*")
+                        .allowCredentials(true);
             }
         };
     }

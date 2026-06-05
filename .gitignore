@@ -1,0 +1,13 @@
+# --- Frontend Ignored Files ---
+farmaceuticas-peru-front-end/node_modules/
+farmaceuticas-peru-front-end/.angular/
+farmaceuticas-peru-front-end/dist/
+
+# --- Backend Ignored Files ---
+farmaceuticas-peru-back-end/target/
+farmaceuticas-peru-back-end/.mvn/wrapper/maven-wrapper.jar
+
+# --- OS & IDE Files ---
+.target/
+.DS_Store
+.vscode/

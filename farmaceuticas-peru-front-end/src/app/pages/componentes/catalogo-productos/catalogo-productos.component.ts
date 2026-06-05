@@ -10,10 +10,6 @@ import { debounceTime, distinctUntilChanged, switchMap, startWith } from 'rxjs/o
   selector: 'app-catalogo-productos',
   standalone: true,
   imports: [CommonModule, FormsModule],
-<<<<<<< HEAD
-  templateUrl: './catalogo-productos.component.html',
-  styleUrl: './catalogo-productos.component.css'
-=======
   template: `
     <div class="catalogo-container">
       <div class="search-bar">
@@ -91,7 +87,6 @@ import { debounceTime, distinctUntilChanged, switchMap, startWith } from 'rxjs/o
     }
     .no-results, .loading-state { text-align: center; padding: 2rem; color: #6c757d; }
   `]
->>>>>>> 47604d8edd03a1fe6b2f9de2ae829b06998cc97b
 })
 export class CatalogoProductosComponent implements OnInit {
   private productoService = inject(ProductoService);

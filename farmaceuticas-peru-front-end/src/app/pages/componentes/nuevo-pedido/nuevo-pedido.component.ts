@@ -12,10 +12,6 @@ import { Producto, Venta, Usuario, FormulaMagistral } from '../../../models/type
   selector: 'app-nuevo-pedido',
   standalone: true,
   imports: [CommonModule, FormsModule],
-<<<<<<< HEAD
-  templateUrl: './nuevo-pedido.component.html',
-  styleUrl: './nuevo-pedido.component.css'
-=======
   template: `
     <div class="nuevo-pedido-container animate-fade-in">
       <h4>Nuevo Pedido</h4>
@@ -129,7 +125,6 @@ import { Producto, Venta, Usuario, FormulaMagistral } from '../../../models/type
     .animate-fade-in { animation: fadeIn 0.5s ease-in-out; }
     @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
   `]
->>>>>>> 47604d8edd03a1fe6b2f9de2ae829b06998cc97b
 })
 export class NuevoPedidoComponent implements OnInit {
   @Output() pedidoGenerado = new EventEmitter<Venta>();

@@ -8,10 +8,6 @@ import { AuthService } from '../../services/auth.service';
   selector: 'app-login',
   standalone: true,
   imports: [CommonModule, FormsModule],
-<<<<<<< HEAD
-  templateUrl: './login.component.html',
-  styleUrl: './login.component.css'
-=======
   template: `
     <!-- CONTENEDOR PRINCIPAL -->
     <div class="login-container">
@@ -164,7 +160,6 @@ import { AuthService } from '../../services/auth.service';
       }
     }
   `]
->>>>>>> 47604d8edd03a1fe6b2f9de2ae829b06998cc97b
 })
 export class LoginComponent {
   email: string = '';

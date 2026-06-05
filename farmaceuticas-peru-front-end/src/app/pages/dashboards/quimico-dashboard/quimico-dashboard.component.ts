@@ -11,10 +11,6 @@ import { NuevoPedidoComponent } from '../../componentes/nuevo-pedido/nuevo-pedid
   selector: 'app-quimico-dashboard',
   standalone: true,
   imports: [CommonModule, CatalogoProductosComponent, NuevoPedidoComponent, FormsModule],
-<<<<<<< HEAD
-  templateUrl: './quimico-dashboard.component.html',
-  styleUrl: './quimico-dashboard.component.css'
-=======
   template: `
     <div class="dashboard-container">
       <header class="dashboard-header">
@@ -118,7 +114,6 @@ import { NuevoPedidoComponent } from '../../componentes/nuevo-pedido/nuevo-pedid
     @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
     .action-btn:disabled { background-color: #6c757d; cursor: not-allowed; }
   `]
->>>>>>> 47604d8edd03a1fe6b2f9de2ae829b06998cc97b
 })
 export class QuimicoDashboardComponent {
   private authService = inject(AuthService);
