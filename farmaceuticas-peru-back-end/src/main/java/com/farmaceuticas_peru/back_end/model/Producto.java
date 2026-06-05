@@ -23,7 +23,6 @@ public class Producto {
     @Id
     private String id;
 
-    // CAMBIO: Se añade el campo "codigo" que faltaba
     private String codigo;
 
     private String nombre;

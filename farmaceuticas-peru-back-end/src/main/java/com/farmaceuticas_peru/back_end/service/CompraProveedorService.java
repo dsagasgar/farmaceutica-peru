@@ -1,5 +1,14 @@
 package com.farmaceuticas_peru.back_end.service;
 
+import java.time.LocalDate;
+import java.util.List;
+import java.util.Map;
+import java.util.function.Function;
+import java.util.stream.Collectors;
+
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
 import com.farmaceuticas_peru.back_end.dto.RecepcionRequest;
 import com.farmaceuticas_peru.back_end.model.CompraProveedor;
 import com.farmaceuticas_peru.back_end.model.ItemCompra;
@@ -7,16 +16,9 @@ import com.farmaceuticas_peru.back_end.model.Producto;
 import com.farmaceuticas_peru.back_end.model.enums.EstadoCompra;
 import com.farmaceuticas_peru.back_end.repository.CompraProveedorRepository;
 import com.farmaceuticas_peru.back_end.repository.ProductoRepository;
+
 import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
-import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
-
-import java.time.LocalDate;
-import java.util.List;
-import java.util.Map;
-import java.util.function.Function;
-import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -53,7 +55,7 @@ public class CompraProveedorService {
 
             int cantidadRecibida = itemVerificado.getCantidadRecibida() != null ? itemVerificado.getCantidadRecibida() : 0;
             itemOriginal.setCantidadRecibida(cantidadRecibida);
-
+            
             if (cantidadRecibida != itemOriginal.getCantidadPedida()) {
                 todoRecibidoCompleto = false;
             }

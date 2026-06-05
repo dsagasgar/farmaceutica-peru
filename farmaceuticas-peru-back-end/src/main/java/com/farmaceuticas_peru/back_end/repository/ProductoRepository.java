@@ -9,7 +9,6 @@ import com.farmaceuticas_peru.back_end.model.Producto;
 
 @Repository
 public interface ProductoRepository extends JpaRepository<Producto, String> {
-    // Busca productos cuyo nombre contenga el término de búsqueda, ignorando mayúsculas/minúsculas
     List<Producto> findByNombreContainingIgnoreCase(String nombre);
 
     // Busca productos con stock para venta mayor a un valor
