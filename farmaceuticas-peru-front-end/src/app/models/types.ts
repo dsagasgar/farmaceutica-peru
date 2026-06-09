@@ -1,3 +1,29 @@
+export interface PersonaRequest {
+  idPersona?: number;
+  nombres?: string;
+  apellidoPaterno?: string;
+  apellidoMaterno?: string;
+  numDocumento?: string;
+  telefono?: string;
+  direccion?: string;
+  idSexo?: string;
+  idTipoDocumento?: number;
+  idUbigeo?: string;
+}
+
+export interface PersonaResponse {
+  idPersona: number;
+  nombres: string;
+  apellidoPaterno: string;
+  apellidoMaterno: string;
+  numDocumento: string;
+  telefono: string;
+  direccion: string;
+  sexoDescripcion: string;
+  tipoDocumentoDescripcion: string;
+  ubigeoDescripcion: string;
+}
+
 export interface Usuario {
   id: string;
   email: string;

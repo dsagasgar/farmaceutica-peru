@@ -22,13 +22,13 @@ public class AdminDashboardController {
     private final AdminDashboardService adminDashboardService;
 
     @GetMapping("/stats")
-    @PreAuthorize("hasAuthority('ROLE_ADMINISTRADOR')")
+    @PreAuthorize("hasAuthority('ADMINISTRADOR')")
     public ResponseEntity<AdminStats> getStats() {
         return ResponseEntity.ok(adminDashboardService.getStats());
     }
 
     @GetMapping("/activity")
-    @PreAuthorize("hasAuthority('ROLE_ADMINISTRADOR')")
+    @PreAuthorize("hasAuthority('ADMINISTRADOR')")
     public ResponseEntity<List<ActividadReciente>> getActividadReciente() {
         return ResponseEntity.ok(adminDashboardService.getActividadReciente());
     }

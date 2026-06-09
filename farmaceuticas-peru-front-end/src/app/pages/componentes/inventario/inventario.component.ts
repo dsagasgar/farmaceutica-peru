@@ -1,19 +1,10 @@
-import { Component } from '@angular/core';
+import { Component, OnInit, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-
-interface ProductoInventario {
-  id: string;
-  nombre: string;
-  marca: string;
-  cantidad: number;
-  alertaMinima: number;
-  precio: number;
-  fechaVencimiento: Date;
-  lote: string;
-  categoria: string;
-  estado: 'disponible' | 'bajo-stock' | 'agotado' | 'vencido';
-}
+import { ProductoService } from '../../../services/producto.service';
+import { Producto } from '../../../models/types';
+import { Subject, Observable } from 'rxjs';
+import { debounceTime, distinctUntilChanged, switchMap, startWith, map } from 'rxjs/operators';
 
 @Component({
   selector: 'app-inventario',
@@ -22,57 +13,47 @@ interface ProductoInventario {
   templateUrl: './inventario.component.html',
   styleUrl: './inventario.component.css'
 })
-export class InventarioComponent {
-  productos: ProductoInventario[] = [
-    {
-      id: '1',
-      nombre: 'Paracetamol 500mg',
-      marca: 'Tafirol',
-      cantidad: 150,
-      alertaMinima: 50,
-      precio: 2.50,
-      fechaVencimiento: new Date('2025-12-31'),
-      lote: 'LT001',
-      categoria: 'Analgesicos',
-      estado: 'disponible'
-    },
-    {
-      id: '2',
-      nombre: 'Amoxicilina 500mg',
-      marca: 'Amoxicilina',
-      cantidad: 30,
-      alertaMinima: 50,
-      precio: 8.50,
-      fechaVencimiento: new Date('2025-06-30'),
-      lote: 'LT002',
-      categoria: 'Antibioticos',
-      estado: 'bajo-stock'
-    }
-  ];
+export class InventarioComponent implements OnInit {
+  private productoService = inject(ProductoService);
 
+  // Control de estado reactivo para las consultas al backend
+  productos$!: Observable<Producto[]>;
+  private busquedaSubject = new Subject<string>();
+  
+  // Modelos para los filtros de la interfaz
   busqueda = '';
   filtroEstado = '';
   filtroCategoria = '';
+  
+  // Variables de control del Modal de Almacén
   mostrarModal = false;
   editando = false;
-  productoForm: ProductoInventario = this.inicializarFormulario();
+  productoForm: Producto = this.inicializarFormulario();
 
-  get productosFiltrrados(): ProductoInventario[] {
-    return this.productos.filter(p => {
-      const coincideBusqueda = p.nombre.toLowerCase().includes(this.busqueda.toLowerCase()) ||
-                             p.marca.toLowerCase().includes(this.busqueda.toLowerCase());
-      const coincideEstado = !this.filtroEstado || p.estado === this.filtroEstado;
-      const coincideCategoria = !this.filtroCategoria || p.categoria === this.filtroCategoria;
-      return coincideBusqueda && coincideEstado && coincideCategoria;
-    });
+  ngOnInit(): void {
+    // Orquestación del flujo de datos con el pipeline asíncrono de Spring Boot
+    this.productos$ = this.busquedaSubject.pipe(
+      startWith(''),
+      debounceTime(300),
+      distinctUntilChanged(),
+      switchMap((term: string) => this.productoService.buscarProductosParaAlmacen(term))
+    );
   }
 
-  get valorTotal(): number {
-    return this.productosFiltrrados.reduce((sum, p) => sum + (p.cantidad * p.precio), 0);
+  onBusqueda(): void {
+    this.busquedaSubject.next(this.busqueda);
   }
 
-  get productosBajoStock(): number {
-    return this.productos.filter(p => p.estado === 'bajo-stock' || p.estado === 'agotado').length;
+  // Getters optimizados que operan sobre los datos reales devueltos por el backend
+  get productosFiltrados$(): Observable<Producto[]> {
+    return this.productos$.pipe(
+      map(productos => productos.filter(p => {
+        // Adaptado a las propiedades reales del modelo: nombre, marca, stock
+        const coincideEstado = !this.filtroEstado || this.calcularEstado(p) === this.filtroEstado;
+        const coincideCategoria = !this.filtroCategoria || p.categoria === this.filtroCategoria;
+        return coincideEstado && coincideCategoria;
+      }))
+    );
   }
 
   abrirModalAgregar(): void {
@@ -81,7 +62,7 @@ export class InventarioComponent {
     this.mostrarModal = true;
   }
 
-  editarProducto(producto: ProductoInventario): void {
+  editarProducto(producto: Producto): void {
     this.editando = true;
     this.productoForm = { ...producto };
     this.mostrarModal = true;
@@ -92,36 +73,40 @@ export class InventarioComponent {
   }
 
   guardarProducto(): void {
-    if (this.editando) {
-      const index = this.productos.findIndex(p => p.id === this.productoForm.id);
-      if (index > -1) {
-        this.productos[index] = this.productoForm;
-      }
-    } else {
-      this.productoForm.id = Math.random().toString();
-      this.productos.push(this.productoForm);
-    }
-    this.cerrarModal();
-  }
-
-  eliminarProducto(id: string): void {
-    if (confirm('¿Desea eliminar este producto?')) {
-      this.productos = this.productos.filter(p => p.id !== id);
+    if (this.editando && this.productoForm.id) {
+      // Llama a tu endpoint real de actualización mapeando el stock de venta asignado
+      this.productoService.actualizarStockVenta(this.productoForm.id, this.productoForm.stockVenta).subscribe({
+        next: (prodActualizado) => {
+          console.log('Stock de venta actualizado en PostgreSQL:', prodActualizado);
+          this.busquedaSubject.next(this.busqueda); // Refresca la lista
+          this.cerrarModal();
+        },
+        error: (err) => console.error('Error al guardar en el backend:', err)
+      });
     }
   }
 
-  private inicializarFormulario(): ProductoInventario {
+  // Helper necesario para calcular dinámicamente el estado visual en la vista del Almacenero
+  calcularEstado(producto: Producto): string {
+    if (!producto.stock || producto.stock === 0) return 'agotado';
+    if (producto.stock < 50) return 'bajo-stock'; // Umbral de alerta mínima
+    return 'disponible';
+  }
+
+  private inicializarFormulario(): Producto {
     return {
       id: '',
+      codigo: '',
       nombre: '',
+      descripcion: '',
       marca: '',
-      cantidad: 0,
-      alertaMinima: 0,
-      precio: 0,
-      fechaVencimiento: new Date(),
-      lote: '',
       categoria: '',
-      estado: 'disponible'
+      formato: '',
+      lote: '',
+      precioUnitario: 0,
+      stock: 0,
+      stockVenta: 0,
+      fechaVencimiento: new Date().toISOString().split('T')[0] // Formato YYYY-MM-DD para inputs de tipo date
     };
   }
 }

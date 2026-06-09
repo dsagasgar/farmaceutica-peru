@@ -34,7 +34,7 @@ public class VentaController {
     }
 
     @GetMapping("/{id}")
-    @PreAuthorize("hasAnyAuthority('ROLE_CAJERO', 'ROLE_QUIMICO_FARMACEUTICO')")
+    @PreAuthorize("hasAnyAuthority('CAJERO', 'QUIMICO_FARMACEUTICO')")
     public ResponseEntity<Venta> buscarOrdenPorId(@PathVariable String id) {
         Optional<Venta> venta = ventaService.buscarOrdenPorId(id);
         return venta.map(ResponseEntity::ok)
@@ -42,7 +42,7 @@ public class VentaController {
     }
 
     @PutMapping("/{id}/registrar-pago")
-    @PreAuthorize("hasAuthority('ROLE_CAJERO')")
+    @PreAuthorize("hasAuthority('CAJERO')")
     public ResponseEntity<Venta> registrarPago(@PathVariable String id, @RequestBody Map<String, String> payload) {
         String cajeroId = payload.get("cajeroId");
         if (cajeroId == null || cajeroId.isEmpty()) {

@@ -1,4 +1,3 @@
-<!-- 1. ESTRUCTURA HTML: Define la vista del componente -->
 <div class="dashboard-container">
   <header class="dashboard-header">
     <div class="header-content">
@@ -20,10 +19,8 @@
       </p>
       
       <div class="section-content">
-        <!-- Estructura condicional: Muestra la lista de compras o el detalle de una seleccionada -->
         <div *ngIf="!compraSeleccionada; else detalleCompra" class="animate-fade-in">
           <div *ngIf="compras$ | async as compras; else loading">
-            <!-- Itera sobre las compras pendientes para mostrarlas como tarjetas -->
             <div *ngIf="compras.length > 0; else noCompras" class="compras-list">
               <div *ngFor="let compra of compras" class="compra-card">
                 <div class="compra-card-header">
@@ -36,7 +33,6 @@
                   <p><strong>Items a verificar:</strong> {{ compra.items.length }}</p>
                 </div>
                 <div class="compra-card-footer">
-                  <!-- (click): Llama a la función 'seleccionarCompra' al hacer clic -->
                   <button (click)="seleccionarCompra(compra)">Verificar Recepción</button>
                 </div>
               </div>
@@ -50,12 +46,11 @@
           </ng-template>
         </div>
 
-        <!-- #detalleCompra: Template que se muestra cuando 'compraSeleccionada' tiene un valor -->
         <ng-template #detalleCompra>
           <div class="animate-fade-in">
             <button (click)="volverALista()" class="back-btn">&larr; Volver a la lista</button>
             <h4>Verificando Compra: {{ compraSeleccionada!.id }}</h4>
-            <!-- (ngSubmit): Llama a 'enviarVerificacion' al enviar el formulario -->
+            
             <form (ngSubmit)="enviarVerificacion()">
               <div class="table-wrapper">
                 <table class="items-table">
@@ -71,7 +66,6 @@
                       <td>{{ item.nombreProducto }}</td>
                       <td>{{ item.cantidadPedida }}</td>
                       <td>
-                        <!-- [(ngModel)]: Vinculación de datos bidireccional. El input y la propiedad del componente están sincronizados. -->
                         <input type="number" min="0" [(ngModel)]="item.cantidadRecibida" [name]="'cantidad-' + i" required>
                       </td>
                     </tr>
@@ -82,8 +76,8 @@
                 <label for="observaciones">Observaciones (ej: cajas dañadas, productos faltantes, etc.)</label>
                 <textarea id="observaciones" rows="4" [(ngModel)]="observaciones" name="observaciones"></textarea>
               </div>
-              <div *ngIf="errorVerificacion" class="error-msg">{{ errorVerificacion }}</div>
-              <!-- [disabled]: Deshabilita el botón si la propiedad 'procesando' es verdadera -->
+              <div *ngIf="errorVerificacion" class="alert alert-error">{{ errorVerificacion }}</div>
+              
               <button type="submit" class="submit-btn" [disabled]="procesando">
                 {{ procesando ? 'Enviando...' : 'Confirmar Recepción y Enviar a Administrador' }}
               </button>
@@ -93,12 +87,21 @@
       </div>
     </section>
 
-    <!-- NUEVA SECCIÓN: Gestión de Stock para Venta -->
+    <!-- GESTIÓN DE STOCK PARA VENTA -->
     <section class="dashboard-section">
       <h2 class="section-title">Gestión de Stock para Venta</h2>
       <p class="section-description">
         Ajuste la cantidad de productos disponibles para la venta al público. El stock de venta no puede superar el stock total en almacén.
       </p>
+
+      <!-- NEW: Interactive feedback banners for inventory management updates -->
+      <div *ngIf="mensajeErrorStock" class="alert alert-error animate-fade-in">
+        {{ mensajeErrorStock }}
+      </div>
+      <div *ngIf="mensajeExitoStock" class="alert alert-exito animate-fade-in">
+        {{ mensajeExitoStock }}
+      </div>
+
       <div class="section-content">
         <div class="table-wrapper">
           <table class="items-table">
@@ -126,12 +129,23 @@
                     >
                   </td>
                   <td class="text-center">
-                    <button (click)="actualizarStockVenta(producto)" class="action-btn-small">Actualizar</button>
+                    <!-- OPTIMIZED: Dynamic status text binding inside the update button template loop -->
+                    <button 
+                      (click)="actualizarStockVenta(producto)" 
+                      [disabled]="idProductoEditando === producto.id"
+                      class="action-btn-small"
+                    >
+                      {{ idProductoEditando === producto.id ? 'Sincronizando...' : 'Actualizar' }}
+                    </button>
                   </td>
                 </tr>
               </ng-container>
             </tbody>
-            <ng-template #loadingStock><tr><td colspan="4" class="placeholder">Cargando productos...</td></tr></ng-template>
+            <ng-template #loadingStock>
+              <tr>
+                <td colspan="4" class="placeholder">Cargando catálogo de productos...</td>
+              </tr>
+            </ng-template>
           </table>
         </div>
       </div>

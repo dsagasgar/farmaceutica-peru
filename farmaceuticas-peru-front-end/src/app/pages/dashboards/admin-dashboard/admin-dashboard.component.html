@@ -13,7 +13,8 @@
 
   <!-- CONTENIDO PRINCIPAL -->
   <main class="dashboard-main">
-    <!-- ESTADÍSTICAS (Ahora dinámicas con el pipe async) -->
+    
+    <!-- ESTADÍSTICAS DINÁMICAS -->
     <ng-container *ngIf="stats$ | async as stats; else loadingStats">
       <section class="stats-section">
         <h2>Estadísticas del Sistema</h2>
@@ -49,25 +50,44 @@
       </section>
     </ng-container>
 
+    <!-- ACCIONES ADMINISTRATIVAS (Restaurado usando tus estilos CSS existentes) -->
+    <section class="actions-section">
+      <h2>Accesos Rápidos de Gestión</h2>
+      <div class="options-grid">
+        <div class="option-card">
+          <h3>Control de Almacén e Inventario</h3>
+          <p>Monitoree stocks globales, alertas críticas de abastecimiento y fechas de vencimiento.</p>
+          <button routerLink="/dashboard/almacen" class="option-btn">Ir a Inventario</button>
+        </div>
+        
+        <div class="option-card">
+          <h3>Auditoría de Fórmulas y Ventas</h3>
+          <p>Revise el historial completo de tickets emitidos por cajeros y preparaciones de químicos.</p>
+          <button routerLink="/dashboard/cajero" class="option-btn">Ver Terminal Caja</button>
+        </div>
+      </div>
+    </section>
+
+    <!-- ACTIVIDAD RECIENTE -->
     <ng-container *ngIf="actividadReciente$ | async as actividades; else loadingActivity">
       <section class="activity-section">
-        <h2>Actividad Reciente</h2>
+        <h2>Actividad Reciente del Servidor</h2>
         <div class="activity-list">
           <div *ngFor="let item of actividades" class="activity-item">
             <p class="activity-title">{{ item.descripcion }}</p>
             <p class="activity-time">{{ item.fecha | date:'medium' }}</p>
           </div>
-          <div *ngIf="actividades.length === 0" class="no-activity">No hay actividad reciente.</div>
+          <div *ngIf="actividades.length === 0" class="no-activity">No hay actividad reciente registrada en PostgreSQL.</div>
         </div>
       </section>
     </ng-container>
 
-    <!-- TEMPLATES DE CARGA -->
+    <!-- TEMPLATES DE CARGA (Loading Placeholders) -->
     <ng-template #loadingStats>
-      <div class="placeholder">Cargando estadísticas...</div>
+      <div class="placeholder">Cargando estadísticas en tiempo real...</div>
     </ng-template>
     <ng-template #loadingActivity>
-      <div class="placeholder">Cargando actividad reciente...</div>
+      <div class="placeholder">Cargando bitácora de actividad reciente...</div>
     </ng-template>
   </main>
-</div>
+</div>j

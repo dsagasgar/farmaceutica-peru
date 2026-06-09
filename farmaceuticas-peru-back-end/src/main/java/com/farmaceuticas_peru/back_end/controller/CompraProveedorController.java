@@ -25,13 +25,13 @@ public class CompraProveedorController {
     private final CompraProveedorService compraService;
 
     @GetMapping("/para-recepcion")
-    @PreAuthorize("hasAuthority('ROLE_ALMACENERO')")
+    @PreAuthorize("hasAuthority('ALMACENERO')")
     public ResponseEntity<List<CompraProveedor>> getComprasParaRecepcion() {
         return ResponseEntity.ok(compraService.getComprasParaRecepcion());
     }
 
     @PostMapping("/{compraId}/registrar-recepcion")
-    @PreAuthorize("hasAuthority('ROLE_ALMACENERO')")
+    @PreAuthorize("hasAuthority('ALMACENERO')")
     public ResponseEntity<CompraProveedor> registrarRecepcion(
             @PathVariable String compraId,
             @RequestBody RecepcionRequest payload) {

@@ -26,12 +26,42 @@ h1 {
   color: #343a40;
   font-weight: 600;
 }
-.user-info { display: flex; align-items: center; gap: 1rem; }
-.user-name { font-weight: 600; color: #495057; }
-.user-role { background: #e9ecef; color: #495057; padding: 0.25rem 0.75rem; border-radius: 1rem; font-size: 0.8rem; font-weight: 500; }
-.logout-btn { background: #dc3545; color: white; border: none; padding: 0.5rem 1rem; border-radius: 6px; cursor: pointer; font-weight: 500; transition: background-color 0.2s; }
-.logout-btn:hover { background: #c82333; }
-.dashboard-main { padding: 2rem; max-width: 1400px; margin: 0 auto; width: 100%; }
+.user-info { 
+  display: flex; 
+  align-items: center; 
+  gap: 1rem; 
+}
+.user-name { 
+  font-weight: 600; 
+  color: #495057; 
+}
+.user-role { 
+  background: #e9ecef; 
+  color: #495057; 
+  padding: 0.25rem 0.75rem; 
+  border-radius: 1rem; 
+  font-size: 0.8rem; 
+  font-weight: 500; 
+}
+.logout-btn { 
+  background: #dc3545; 
+  color: white; 
+  border: none; 
+  padding: 0.5rem 1rem; 
+  border-radius: 6px; 
+  cursor: pointer; 
+  font-weight: 500; 
+  transition: background-color 0.2s; 
+}
+.logout-btn:hover { 
+  background: #c82333; 
+}
+.dashboard-main { 
+  padding: 2rem; 
+  max-width: 1400px; 
+  margin: 0 auto; 
+  width: 100%; 
+}
 .dashboard-section {
   background: white;
   border: 1px solid #dee2e6;
@@ -40,12 +70,68 @@ h1 {
   margin-bottom: 2rem;
   box-shadow: 0 2px 4px rgba(0,0,0,0.02);
 }
-.section-title { font-size: 1.25rem; color: #343a40; margin: 0 0 0.5rem 0; font-weight: 600; }
-.section-description { font-size: 0.95rem; color: #6c757d; margin-bottom: 1.5rem; }
-.placeholder { text-align: center; padding: 2rem; border: 2px dashed #e9ecef; border-radius: 6px; color: #6c757d; }
-.action-btn { background-color: #0056b3; color: white; border: none; padding: 0.6rem 1.2rem; border-radius: 6px; cursor: pointer; font-weight: 500; }
-.orden-generada-info { margin-top: 1.5rem; padding: 1rem; background-color: #d4edda; border: 1px solid #c3e6cb; border-radius: 6px; text-align: center; }
-.orden-id { background: #28a745; color: white; padding: 0.5rem 1rem; border-radius: 4px; display: inline-block; font-size: 1.2rem; font-weight: bold; margin-top: 0.5rem; }
-.animate-fade-in { animation: fadeIn 0.5s ease-in-out; }
-@keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
-.action-btn:disabled { background-color: #6c757d; cursor: not-allowed; }
+.section-title { 
+  font-size: 1.25rem; 
+  color: #343a40; 
+  margin: 0 0 0.5rem 0; 
+  font-weight: 600; 
+}
+.section-description { 
+  font-size: 0.95rem; 
+  color: #6c757d; 
+  margin-bottom: 1.5rem; 
+}
+.action-btn { 
+  background-color: #0056b3; 
+  color: white; 
+  border: none; 
+  padding: 0.6rem 1.4rem; 
+  border-radius: 6px; 
+  cursor: pointer; 
+  font-weight: 600; 
+  transition: opacity 0.2s ease;
+}
+.action-btn:hover {
+  opacity: 0.9;
+}
+.action-btn:disabled { 
+  background-color: #6c757d; 
+  cursor: not-allowed; 
+}
+
+/* ==========================================================================
+   MODIFICADO: Contenedor Informativo del Ticket Generado (Dispatch Alert)
+   ========================================================================== */
+.orden-generada-info { 
+  margin-top: 1.5rem; 
+  padding: 1.25rem; 
+  background-color: #d4edda; 
+  border: 1px solid #c3e6cb; 
+  border-radius: 6px; 
+  text-align: center; 
+  color: #155724;
+}
+.success-title {
+  font-size: 1.1rem;
+  font-weight: 700;
+  margin: 0 0 0.5rem 0;
+}
+.orden-id { 
+  background: #28a745; 
+  color: white; 
+  padding: 0.6rem 1.5rem; 
+  border-radius: 4px; 
+  display: inline-block; 
+  font-size: 1.25rem; 
+  font-weight: bold; 
+  margin-top: 0.75rem; 
+  letter-spacing: 0.5px;
+  box-shadow: 0 2px 4px rgba(40, 167, 69, 0.2);
+}
+.animate-fade-in { 
+  animation: fadeIn 0.4s ease-out; 
+}
+@keyframes fadeIn { 
+  from { opacity: 0; transform: translateY(-5px); } 
+  to { opacity: 1; transform: translateY(0); } 
+}

@@ -18,15 +18,13 @@ export class AdminDashboardComponent implements OnInit {
   private router = inject(Router);
   private dashboardService = inject(AdminDashboardService);
 
-  usuario: Usuario | null = null;
+  // Inicialización directa inline sin necesidad de usar constructor clásico
+  usuario: Usuario | null = this.authService.obtenerUsuarioActual();
   stats$!: Observable<AdminStats>;
   actividadReciente$!: Observable<ActividadReciente[]>;
 
-  constructor() {
-    this.usuario = this.authService.obtenerUsuarioActual();
-  }
-
   ngOnInit(): void {
+    // Pipeline data extraction mapping directly from Spring Boot rest endpoints
     this.stats$ = this.dashboardService.getStats();
     this.actividadReciente$ = this.dashboardService.getActividadReciente();
   }

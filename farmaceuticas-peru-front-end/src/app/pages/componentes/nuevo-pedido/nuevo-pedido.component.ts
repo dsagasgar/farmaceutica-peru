@@ -1,10 +1,10 @@
-import { Component, OnInit, inject, Output, EventEmitter } from '@angular/core';
+import { Component, OnInit, inject, Output, EventEmitter, OnDestroy } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { ProductoService } from '../../../services/producto.service';
 import { VentaService } from '../../../services/venta.service';
 import { AuthService } from '../../../services/auth.service';
-import { Subject } from 'rxjs';
+import { Subject, Subscription } from 'rxjs';
 import { debounceTime, distinctUntilChanged, switchMap } from 'rxjs/operators';
 import { Producto, Venta, Usuario, FormulaMagistral } from '../../../models/types';
 
@@ -15,7 +15,7 @@ import { Producto, Venta, Usuario, FormulaMagistral } from '../../../models/type
   templateUrl: './nuevo-pedido.component.html',
   styleUrl: './nuevo-pedido.component.css'
 })
-export class NuevoPedidoComponent implements OnInit {
+export class NuevoPedidoComponent implements OnInit, OnDestroy {
   @Output() pedidoGenerado = new EventEmitter<Venta>();
   @Output() cancelar = new EventEmitter<void>();
 
@@ -24,29 +24,40 @@ export class NuevoPedidoComponent implements OnInit {
   private authService = inject(AuthService);
 
   private searchTerms = new Subject<string>();
+  private searchSubscription!: Subscription; // Para evitar fugas de memoria (memory leaks)
+
   usuario: Usuario | null = null;
   productosDisponibles: Producto[] = [];
   terminoBusquedaProducto = '';
   productosFiltrados: Producto[] = [];
   pedidoActual: { producto: Producto, cantidad: number }[] = [];
   formulasEnPedido: FormulaMagistral[] = [];
-  formulaActual: { nombre: string, composicion: string, procedimiento: string, precio: number } = { nombre: '', composicion: '', procedimiento: '', precio: 0 };
+  
+  formulaActual = { nombre: '', composicion: '', procedimiento: '', precio: 0 };
   clienteNombre = '';
   totalPedido = 0;
   procesandoPedido = false;
+  errorMensaje = ''; // Alerta visual para problemas de stock en el backend
 
   ngOnInit(): void {
     this.usuario = this.authService.obtenerUsuarioActual();
     
-    // Configura la búsqueda reactiva con debounce
-    this.searchTerms.pipe(
-      debounceTime(300), // Espera 300ms después de la última pulsación
-      distinctUntilChanged(), // Ignora si el término de búsqueda es el mismo
-      // Cambia a una nueva búsqueda cada vez que el término cambia
+    // Configura la búsqueda reactiva con el endpoint real /api/productos/venta
+    this.searchSubscription = this.searchTerms.pipe(
+      debounceTime(300),
+      distinctUntilChanged(),
       switchMap((term: string) => this.productoService.buscarProductosParaVenta(term)),
-    ).subscribe((productos: Producto[]) => {
-      this.productosFiltrados = productos;
+    ).subscribe({
+      next: (productos: Producto[]) => this.productosFiltrados = productos,
+      error: (err) => console.error('Error en el stream de búsqueda:', err)
     });
+  }
+
+  ngOnDestroy(): void {
+    // Buenas prácticas: limpiamos la suscripción al destruir el componente
+    if (this.searchSubscription) {
+      this.searchSubscription.unsubscribe();
+    }
   }
 
   buscarProducto(): void {
@@ -56,9 +67,12 @@ export class NuevoPedidoComponent implements OnInit {
   agregarProducto(producto: Producto): void {
     const itemExistente = this.pedidoActual.find(item => item.producto.id === producto.id);
     if (itemExistente) {
-      if (itemExistente.cantidad < producto.stock) itemExistente.cantidad++;
+      // CORREGIDO: Se valida contra stockVenta que es el límite real del mostrador
+      if (itemExistente.cantidad < producto.stockVenta) itemExistente.cantidad++;
     } else {
-      this.pedidoActual.push({ producto, cantidad: 1 });
+      if (producto.stockVenta > 0) {
+        this.pedidoActual.push({ producto, cantidad: 1 });
+      }
     }
     this.terminoBusquedaProducto = '';
     this.productosFiltrados = [];
@@ -68,7 +82,9 @@ export class NuevoPedidoComponent implements OnInit {
   actualizarCantidad(productoId: string, event: Event): void {
     const nuevaCantidad = parseInt((event.target as HTMLInputElement).value, 10);
     const item = this.pedidoActual.find(i => i.producto.id === productoId);
-    if (item && nuevaCantidad > 0 && nuevaCantidad <= item.producto.stock) {
+    
+    // CORREGIDO: Consistencia con la cuota de stockVenta
+    if (item && nuevaCantidad > 0 && nuevaCantidad <= item.producto.stockVenta) {
       item.cantidad = nuevaCantidad;
       this.calcularTotal();
     } else if (item) {
@@ -83,15 +99,13 @@ export class NuevoPedidoComponent implements OnInit {
 
   agregarFormula(): void {
     if (!this.formulaActual.nombre || !this.formulaActual.composicion || this.formulaActual.precio <= 0) {
-      // Podrías mostrar un error al usuario
       return;
     }
     const nuevaFormula: FormulaMagistral = {
-      id: `temp-${Date.now()}`, // ID temporal para el frontend
+      id: `temp-${Date.now()}`, 
       ...this.formulaActual
     };
     this.formulasEnPedido.push(nuevaFormula);
-    // Resetear el formulario de la fórmula
     this.formulaActual = { nombre: '', composicion: '', procedimiento: '', precio: 0 };
     this.calcularTotal();
   }
@@ -113,6 +127,9 @@ export class NuevoPedidoComponent implements OnInit {
     }
     
     this.procesandoPedido = true;
+    this.errorMensaje = '';
+
+    // CORREGIDO: Estructura limpia que coincide con Omit<Venta, 'id' | 'fecha' | 'estado'>
     const nuevaVenta = {
       clienteNombre: this.clienteNombre,
       quimicoId: this.usuario.id,
@@ -124,14 +141,20 @@ export class NuevoPedidoComponent implements OnInit {
         subtotal: item.producto.precioUnitario * item.cantidad
       })),
       itemsFormula: this.formulasEnPedido,
-      total: this.totalPedido,
-      // Se añade el estado inicial para que el objeto cumpla con la interfaz Venta
-      estado: 'PENDIENTE_PAGO'
+      total: this.totalPedido
     };
 
-    this.ventaService.crearVenta(nuevaVenta as any).subscribe((ventaGenerada: Venta) => {
-      this.procesandoPedido = false;
-      this.pedidoGenerado.emit(ventaGenerada);
+    // Removido el cast 'as any' para garantizar un tipado estricto (strict typing contract)
+    this.ventaService.crearVenta(nuevaVenta).subscribe({
+      next: (ventaGenerada: Venta) => {
+        this.procesandoPedido = false;
+        this.pedidoGenerado.emit(ventaGenerada);
+      },
+      error: (err) => {
+        this.procesandoPedido = false;
+        this.errorMensaje = 'Error al registrar la orden. Verifique el stock disponible en el servidor.';
+        console.error('Database transaction rollback trigger:', err);
+      }
     });
   }
 }

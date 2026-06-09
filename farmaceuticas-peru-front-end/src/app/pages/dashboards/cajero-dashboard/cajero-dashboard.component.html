@@ -11,7 +11,6 @@
   </header>
 
   <main class="dashboard-main">
-    <!-- HU1: Registrar Orden de Venta -->
     <section class="dashboard-section">
       <h2 class="section-title">Registrar Pago de Orden</h2>
       <p class="section-description">
@@ -27,7 +26,7 @@
                 type="text" 
                 id="ordenId" 
                 [(ngModel)]="ordenIdBusqueda"
-                placeholder="Ej: OV-2024-001"
+                placeholder="Ej: OV-2026-001"
                 (keyup.enter)="buscarOrden()"
                 [disabled]="buscando"
               >
@@ -45,7 +44,9 @@
               <span><strong>Cliente:</strong> {{ ordenSeleccionada.clienteNombre || 'N/A' }}</span>
               <span><strong>Fecha:</strong> {{ ordenSeleccionada.fecha | date:'dd/MM/yyyy HH:mm' }}</span>
             </div>
-            <table class="items-table">
+            
+            <!-- Medicamentos Comerciales -->
+            <table class="items-table" *ngIf="ordenSeleccionada.items.length > 0">
               <thead>
                 <tr>
                   <th>Producto</th>
@@ -62,22 +63,47 @@
                   <td>{{ item.subtotal | currency:'S/ ' }}</td>
                 </tr>
               </tbody>
+            </table>
+
+            <!-- NEW: Fórmulas Magistrales e Inyecciones de Laboratorio -->
+            <div *ngIf="ordenSeleccionada.itemsFormula && ordenSeleccionada.itemsFormula.length > 0" class="formulas-seccion">
+              <h4 class="subtitulo-formulas">Fórmulas Magistrales Preparadas</h4>
+              <table class="items-table formulas-table">
+                <thead>
+                  <tr>
+                    <th>Fórmula</th>
+                    <th>Composición</th>
+                    <th>Precio</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr *ngFor="let formula of ordenSeleccionada.itemsFormula">
+                    <td><strong>{{ formula.nombre }}</strong></td>
+                    <td class="text-truncate">{{ formula.composicion }}</td>
+                    <td>{{ formula.precio | currency:'S/ ' }}</td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+
+            <!-- Tabla de Cierre con el Total Integrado de PostgreSQL -->
+            <table class="items-table total-table">
               <tfoot>
                 <tr>
-                  <td colspan="3">Total a Pagar</td>
-                  <td>{{ ordenSeleccionada.total | currency:'S/ ' }}</td>
+                  <td class="text-right-total"><strong>Total Neto a Cobrar:</strong></td>
+                  <td class="total-destacado">{{ ordenSeleccionada.total | currency:'S/ ' }}</td>
                 </tr>
               </tfoot>
             </table>
             
             <div *ngIf="ordenSeleccionada.estado === 'PENDIENTE_PAGO'" class="acciones-pago">
               <button class="pagar-btn" (click)="registrarPago()" [disabled]="procesandoPago">
-                {{ procesandoPago ? 'Procesando...' : 'Registrar Pago y Emitir Comprobante' }}
+                {{ procesandoPago ? 'Procesando Transacción...' : 'Registrar Pago y Emitir Comprobante' }}
               </button>
             </div>
             
             <div *ngIf="ordenSeleccionada.estado === 'PAGADO'" class="pago-confirmado">
-              <p>✅ Pago registrado exitosamente por el usuario {{ usuario?.nombre }}.</p>
+              <p>✅ Pago registrado exitosamente por el cajero: {{ usuario?.nombre }}.</p>
               <button class="imprimir-btn">Imprimir Boleta</button>
               <button class="imprimir-btn">Imprimir Factura</button>
             </div>

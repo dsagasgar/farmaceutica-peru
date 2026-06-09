@@ -8,10 +8,6 @@ import { Usuario, CompraProveedor, ItemCompra, Producto } from '../../../models/
 import { Observable } from 'rxjs';
 import { ProductoService } from '../../../services/producto.service';
 
-/**
- * Gestiona el panel del Almacenero.
- * Su principal responsabilidad es la HU1: verificar la recepción de compras de proveedores.
- */
 @Component({
   selector: 'app-almacen-dashboard',
   standalone: true,
@@ -19,53 +15,46 @@ import { ProductoService } from '../../../services/producto.service';
   templateUrl: './almacen-dashboard.component.html',
   styleUrl: './almacen-dashboard.component.css'
 })
-// 3. LÓGICA TYPESCRIPT: Define el comportamiento del componente.
 export class AlmacenDashboardComponent implements OnInit {
-  // Inyección de dependencias: Angular nos provee las instancias de los servicios que necesitamos.
   private authService = inject(AuthService);
   private compraService = inject(CompraService);
   private router = inject(Router);
   private productoService = inject(ProductoService);
 
-  // --- PROPIEDADES DE ESTADO ---
-  usuario: Usuario | null = null;
-  // Observable que contiene la lista de compras pendientes a recibir. El pipe `async` en el HTML se suscribe a él.
+  // OPTIMIZED: Inline property assignment to remove the legacy constructor block
+  usuario: Usuario | null = this.authService.obtenerUsuarioActual();
   compras$!: Observable<CompraProveedor[]>;
-  // Observable para la lista de productos en la sección de gestión de stock.
   productosGestion$!: Observable<Producto[]>;
-  // Almacena la compra que el usuario está verificando actualmente. Controla qué vista se muestra.
+  
   compraSeleccionada: CompraProveedor | null = null;
-  // Copia de los items de la compra seleccionada para poder editarlos en el formulario sin afectar el original.
   itemsVerificacion: ItemCompra[] = [];
   observaciones: string = '';
   procesando: boolean = false;
   errorVerificacion: string = '';
 
-  // El constructor se usa para inicializar el componente y sus dependencias.
-  constructor() {
-    this.usuario = this.authService.obtenerUsuarioActual();
-  }
+  // NEW: State managers for user feedback on separate transactional operations
+  idProductoEditando: string | null = null;
+  mensajeExitoStock: string = '';
+  mensajeErrorStock: string = '';
 
-  // ngOnInit: Gancho del ciclo de vida. Se ejecuta una vez que el componente se ha inicializado. Ideal para cargar datos iniciales.
   ngOnInit(): void {
-    this.compras$ = this.compraService.getComprasParaRecepcion();
-    this.productosGestion$ = this.productoService.buscarProductosParaAlmacen(''); // Carga todos los productos para la gestión
+    this.cargarDatosAlmacen();
   }
 
-  // --- MÉTODOS DE FLUJO DE TRABAJO ---
+  // Extracted data load logic for easier refreshing
+  private cargarDatosAlmacen(): void {
+    this.compras$ = this.compraService.getComprasParaRecepcion();
+    this.productosGestion$ = this.productoService.buscarProductosParaAlmacen('');
+  }
 
-  /** Se activa al hacer clic en "Verificar". Cambia la vista a detalle y prepara el formulario. */
   seleccionarCompra(compra: CompraProveedor): void {
-    this.compraSeleccionada = compra;
-    // Clonamos los items de forma segura para no modificar el objeto original en la lista mientras editamos.
+    this.compraSeleccionada = { ...compra };
     this.itemsVerificacion = compra.items.map(item => ({ ...item }));
-    // Pre-llenar la cantidad recibida con la cantidad pedida para facilitar la tarea
     this.itemsVerificacion.forEach(item => {
       item.cantidadRecibida = item.cantidadRecibida ?? item.cantidadPedida;
     });
   }
 
-  /** Resetea la vista para mostrar nuevamente la lista de compras. */
   volverALista(): void {
     this.compraSeleccionada = null;
     this.itemsVerificacion = [];
@@ -73,7 +62,6 @@ export class AlmacenDashboardComponent implements OnInit {
     this.errorVerificacion = '';
   }
 
-  /** Envía los datos del formulario al servicio para registrar la recepción y actualiza la vista. */
   enviarVerificacion(): void {
     if (!this.compraSeleccionada) return;
     this.procesando = true;
@@ -84,8 +72,7 @@ export class AlmacenDashboardComponent implements OnInit {
         next: () => {
           this.procesando = false;
           this.volverALista();
-          this.compras$ = this.compraService.getComprasParaRecepcion(); // Recarga la lista de compras pendientes.
-          // Aquí se podría mostrar un mensaje de éxito
+          this.compras$ = this.compraService.getComprasParaRecepcion();
         },
         error: (err) => {
           this.errorVerificacion = err.message || 'Ocurrió un error al enviar la verificación.';
@@ -94,21 +81,36 @@ export class AlmacenDashboardComponent implements OnInit {
       });
   }
 
-  /** Actualiza la cantidad de stock disponible para la venta de un producto. */
+  /**
+   * Commits the updated retail stock allocation to the database
+   * @param producto Selected core target entity
+   */
   actualizarStockVenta(producto: Producto): void {
-    // Aquí podrías añadir una lógica de feedback visual (ej. un spinner en el botón)
+    // Structural business rule safeguard: Avoid exceeding physical limits
+    if (producto.stockVenta > producto.stock) {
+      this.mensajeErrorStock = `El stock de venta para "${producto.nombre}" no puede superar al stock total físico.`;
+      this.mensajeExitoStock = '';
+      return;
+    }
+
+    this.idProductoEditando = producto.id;
+    this.mensajeErrorStock = '';
+    this.mensajeExitoStock = '';
+
     this.productoService.actualizarStockVenta(producto.id, producto.stockVenta).subscribe({
       next: (productoActualizado) => {
-        console.log('Stock de venta actualizado', productoActualizado);
-        // Opcional: mostrar un toast/mensaje de éxito.
-        // Para refrescar la lista, podrías re-llamar al servicio, o si el backend devuelve
-        // el objeto actualizado, simplemente actualizarlo en la lista local.
+        this.idProductoEditando = null;
+        this.mensajeExitoStock = `¡Stock de venta para "${productoActualizado.nombre}" actualizado con éxito en PostgreSQL!`;
+        console.log('Database synchronization successful:', productoActualizado);
       },
-      error: (err) => console.error('Error al actualizar stock de venta', err)
+      error: (err) => {
+        this.idProductoEditando = null;
+        this.mensajeErrorStock = 'Error de comunicación con el servidor de Spring Boot. Reintente.';
+        console.error('Transactional error payload:', err);
+      }
     });
   }
 
-  /** Cierra la sesión del usuario y lo redirige a la página de login. */
   logout(): void {
     this.authService.logout();
     this.router.navigate(['/login']);

@@ -1,93 +1,112 @@
 <div class="register-venta-container">
   <div class="header">
-    <h1>Registrar Orden de Venta</h1>
-    <div class="ticket-info">
-      <span>Ticket #: {{ ticketNumber }}</span>
-      <span>Fecha: {{ currentDate }}</span>
+    <h1>Terminal de Caja - Registrar Pago</h1>
+    <div class="ticket-info" *ngIf="ordenActual">
+      <span>Ticket #: {{ ordenActual.id }}</span>
+      <span>Fecha Emisión: {{ ordenActual.fecha | date:'dd/MM/yyyy' }}</span>
     </div>
   </div>
 
-  <div class="content-grid">
+  <!-- SECCIÓN NUEVA: Buscador de Órdenes por Código de Ticket -->
+  <div class="section search-section">
+    <h2>Buscar Orden Pendiente</h2>
+    <div class="search-box">
+      <input 
+        type="text" 
+        placeholder="Ingrese el código del ticket (Ej: UUID de la orden)..." 
+        [(ngModel)]="buscarTicketId" 
+        (keyup.enter)="buscarOrden()"
+        class="search-input"
+      />
+      <button (click)="buscarOrden()" class="btn-buscar">Buscar Orden</button>
+    </div>
+  </div>
+
+  <!-- Mensajes de control de transacciones de la base de datos -->
+  <div *ngIf="mensajeError" class="alert alert-error">
+    {{ mensajeError }}
+  </div>
+  <div *ngIf="mensajeExito" class="alert alert-exito">
+    {{ mensajeExito }}
+  </div>
+
+  <!-- FLUJO CONDICIONAL: Solo muestra el detalle si hay una orden válida cargada -->
+  <div class="content-grid" *ngIf="ordenActual">
+    
+    <!-- Datos del Cliente (Sólo Lectura para el Cajero) -->
     <div class="section cliente-section">
       <h2>Datos del Cliente</h2>
-      <div class="form-group">
-        <label>Nombre del Cliente</label>
-        <input type="text" [(ngModel)]="cliente.nombre" placeholder="Ingrese nombre del cliente"/>
+      <div class="static-group">
+        <label>Nombre del Cliente:</label>
+        <p class="static-value">{{ ordenActual.clienteNombre }}</p>
       </div>
-      <div class="form-group">
-        <label>Cédula/RUC</label>
-        <input type="text" [(ngModel)]="cliente.cedula" placeholder="Ingrese cédula o RUC"/>
+      <div class="static-group">
+        <label>Atendido por (ID Químico):</label>
+        <p class="static-value">{{ ordenActual.quimicoId }}</p>
       </div>
-      <div class="form-group">
-        <label>Teléfono</label>
-        <input type="text" [(ngModel)]="cliente.telefono" placeholder="Ingrese teléfono"/>
+      <div class="static-group">
+        <label>Estado del Ticket:</label>
+        <span class="badge badge-pendiente">{{ ordenActual.estado }}</span>
       </div>
     </div>
 
+    <!-- Detalle de Productos y Fórmulas Magistrales -->
     <div class="section productos-section">
-      <h2>Productos/Medicamentos</h2>
-      <div class="add-producto">
-        <input type="text" placeholder="Buscar producto..." [(ngModel)]="busquedaProducto" class="search-input"/>
-        <select [(ngModel)]="selectedProducto" class="select-producto">
-          <option value="">Seleccionar producto</option>
-          <option *ngFor="let p of productos" [value]="p.id">{{ p.nombre }} - {{ p.precio }}</option>
-        </select>
-        <input type="number" [(ngModel)]="cantidadProducto" placeholder="Cantidad" min="1" class="cantidad-input"/>
-        <button (click)="agregarProducto()" class="btn-agregar">Agregar</button>
-      </div>
+      <h2>Items de la Orden</h2>
 
-      <div class="items-list" *ngIf="items.length > 0">
+      <!-- Tabla de Medicamentos Estándar -->
+      <div class="items-list" *ngIf="ordenActual.items.length > 0">
         <div class="item-header">
           <span>Producto</span>
           <span>Cantidad</span>
           <span>Precio</span>
           <span>Subtotal</span>
-          <span>Acción</span>
         </div>
-        <div *ngFor="let item of items; let i = index" class="item-row">
-          <span>{{ item.nombre }}</span>
+        <div *ngFor="let item of ordenActual.items" class="item-row">
+          <span>{{ item.nombreProducto }}</span>
           <span>{{ item.cantidad }}</span>
-          <span>{{ item.precio.toFixed(2) }}</span>
-          <span class="subtotal">{{ item.subtotal.toFixed(2) }}</span>
-          <button (click)="eliminarItem(i)" class="btn-eliminar">Eliminar</button>
+          <span>{{ item.precioUnitario | currency:'S/ ' }}</span>
+          <span class="subtotal">{{ item.subtotal | currency:'S/ ' }}</span>
         </div>
       </div>
 
-      <div *ngIf="items.length === 0" class="no-items">
-        <p>No hay productos agregados</p>
+      <!-- Tabla de Fórmulas Magistrales Añadidas (Opcional) -->
+      <div class="formulas-list" *ngIf="ordenActual.itemsFormula && ordenActual.itemsFormula.length > 0">
+        <h3 class="subtitle-formulas">Fórmulas Magistrales Preparadas</h3>
+        <div class="item-header formula-header">
+          <span>Descripción de la Fórmula</span>
+          <span>Composición</span>
+          <span>Precio</span>
+        </div>
+        <div *ngFor="let formula of ordenActual.itemsFormula" class="item-row formula-row">
+          <span><strong>{{ formula.nombre }}</strong></span>
+          <span class="text-truncate">{{ formula.composicion }}</span>
+          <span class="subtotal">{{ formula.precio | currency:'S/ ' }}</span>
+        </div>
       </div>
     </div>
   </div>
 
-  <div class="resumen-section">
-    <h2>Resumen de la Orden</h2>
+  <!-- Resumen Económico del Ticket y Acciones de Facturación -->
+  <div class="resumen-section" *ngIf="ordenActual">
+    <h2>Resumen de Cobro</h2>
     <div class="resumen-grid">
-      <div class="resumen-item">
-        <span class="label">Cantidad de Productos:</span>
-        <span class="valor">{{ cantidadTotal }}</span>
-      </div>
-      <div class="resumen-item">
-        <span class="label">Subtotal:</span>
-        <span class="valor">{{ subtotal.toFixed(2) }}</span>
-      </div>
-      <div class="resumen-item">
-        <span class="label">Impuesto ({{ impuestoPorcentaje }}%):</span>
-        <span class="valor">{{ impuesto.toFixed(2) }}</span>
-      </div>
       <div class="resumen-item total">
-        <span class="label">Total:</span>
-        <span class="valor">{{ total.toFixed(2) }}</span>
+        <span class="label">Monto Total a Pagar:</span>
+        <!-- Eliminado el impuesto harcodeado del 15% ya que el total viene calculado netamente del Backend -->
+        <span class="valor">{{ ordenActual.total | currency:'S/ ' }}</span>
       </div>
-    </div>
-
-    <div class="notas">
-      <label>Notas/Observaciones:</label>
-      <textarea [(ngModel)]="notas" placeholder="Agregar notas o instrucciones especiales..."></textarea>
     </div>
 
     <div class="acciones">
-      <button (click)="limpiarFormulario()" class="btn-limpiar">Limpiar Formulario</button>
-      <button (click)="emitirTicket()" [disabled]="items.length === 0" class="btn-emitir">Emitir Ticket</button>
+      <button (click)="limpiarFormulario()" [disabled]="procesandoPago" class="btn-limpiar">Cancelar</button>
+      <button 
+        (click)="emitirTicket()" 
+        [disabled]="procesandoPago" 
+        class="btn-emitir"
+      >
+        {{ procesandoPago ? 'Procesando Pago...' : 'Registrar Pago y Emitir Comprobante' }}
+      </button>
     </div>
   </div>
 </div>

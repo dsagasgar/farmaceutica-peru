@@ -1,5 +1,3 @@
-
-
 package com.farmaceuticas_peru.back_end.model.enums;
 
 public enum Rol {

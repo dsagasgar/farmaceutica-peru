@@ -1,4 +1,4 @@
-import { Component, inject, ChangeDetectorRef } from '@angular/core';
+import { Component, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
@@ -17,9 +17,9 @@ export class CajeroDashboardComponent {
   private authService = inject(AuthService);
   private ventaService = inject(VentaService);
   private router = inject(Router);
-  private cdr = inject(ChangeDetectorRef);
 
-  usuario: Usuario | null = null;
+  // OPTIMIZED: Inline property assignment to clean up the legacy constructor block
+  usuario: Usuario | null = this.authService.obtenerUsuarioActual();
   ordenIdBusqueda: string = '';
   buscando: boolean = false;
   errorBusqueda: string = '';
@@ -27,17 +27,14 @@ export class CajeroDashboardComponent {
   procesandoPago: boolean = false;
   errorPago: string = '';
 
-  constructor() {
-    this.usuario = this.authService.obtenerUsuarioActual();
-  }
-
   buscarOrden(): void {
-    if (!this.ordenIdBusqueda) return;
+    if (!this.ordenIdBusqueda.trim()) return;
     this.buscando = true;
     this.errorBusqueda = '';
     this.ordenSeleccionada = null;
     this.errorPago = '';
-    this.ventaService.buscarOrdenPorId(this.ordenIdBusqueda).subscribe({
+
+    this.ventaService.buscarOrdenPorId(this.ordenIdBusqueda.trim()).subscribe({
       next: (orden) => {
         if (orden) {
           this.ordenSeleccionada = orden;
@@ -47,8 +44,8 @@ export class CajeroDashboardComponent {
         this.buscando = false;
       },
       error: (err) => {
-        this.errorBusqueda = 'Ocurrió un error al buscar la orden.';
-        console.error(err);
+        this.errorBusqueda = 'No se pudo conectar con el servidor de Spring Boot para recuperar el ticket.';
+        console.error('Database communication failure:', err);
         this.buscando = false;
       }
     });
@@ -58,15 +55,16 @@ export class CajeroDashboardComponent {
     if (!this.ordenSeleccionada || !this.usuario) return;
     this.procesandoPago = true;
     this.errorPago = '';
+
     this.ventaService.registrarPago(this.ordenSeleccionada.id, this.usuario.id).subscribe({
       next: (ordenActualizada) => {
         this.ordenSeleccionada = ordenActualizada;
         this.procesandoPago = false;
-        this.cdr.detectChanges(); 
+        // Cleaned up the redundant manual ChangeDetectorRef trigger layout
       },
       error: (err) => {
         this.errorPago = err.message || 'Ocurrió un error al registrar el pago.';
-        console.error(err);
+        console.error('Payment transaction rollback trigger:', err);
         this.procesandoPago = false;
       }
     });
