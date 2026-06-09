@@ -20,7 +20,8 @@
       
       <div class="section-content">
         <div *ngIf="!compraSeleccionada; else detalleCompra" class="animate-fade-in">
-          <div *ngIf="compras$ | async as compras; else loading">
+          <!-- CORREGIDO: Evaluación basada en arreglos nativos del componente -->
+          <div *ngIf="!cargandoCompras; else loading">
             <div *ngIf="compras.length > 0; else noCompras" class="compras-list">
               <div *ngFor="let compra of compras" class="compra-card">
                 <div class="compra-card-header">
@@ -94,7 +95,6 @@
         Ajuste la cantidad de productos disponibles para la venta al público. El stock de venta no puede superar el stock total en almacén.
       </p>
 
-      <!-- NEW: Interactive feedback banners for inventory management updates -->
       <div *ngIf="mensajeErrorStock" class="alert alert-error animate-fade-in">
         {{ mensajeErrorStock }}
       </div>
@@ -114,8 +114,9 @@
               </tr>
             </thead>
             <tbody>
-              <ng-container *ngIf="productosGestion$ | async as productos; else loadingStock">
-                <tr *ngFor="let producto of productos">
+              <ng-container *ngIf="!cargandoProductos; else loadingStock">
+                <!-- CORREGIDO: Se añade trackBy para bloquear re-renders globales e innecesarios -->
+                <tr *ngFor="let producto of productosGestion; trackBy: trackByProductoId">
                   <td>{{ producto.nombre }} ({{ producto.codigo }})</td>
                   <td class="text-center">{{ producto.stock }}</td>
                   <td class="text-center">
@@ -129,7 +130,6 @@
                     >
                   </td>
                   <td class="text-center">
-                    <!-- OPTIMIZED: Dynamic status text binding inside the update button template loop -->
                     <button 
                       (click)="actualizarStockVenta(producto)" 
                       [disabled]="idProductoEditando === producto.id"

@@ -18,7 +18,8 @@
       </p>
       <div class="section-content">
         <div class="orden-venta-container">
-          <!-- Paso 1: Buscador de Orden -->
+          
+          <!-- Paso 1: Buscador de Orden (Unlocks cleanly without HTML disabled freezing traps) -->
           <div class="buscador-orden">
             <label for="ordenId">ID de la Orden de Venta:</label>
             <div class="input-group">
@@ -26,9 +27,8 @@
                 type="text" 
                 id="ordenId" 
                 [(ngModel)]="ordenIdBusqueda"
-                placeholder="Ej: OV-2026-001"
-                (keyup.enter)="buscarOrden()"
-                [disabled]="buscando"
+                placeholder="Ej: VENTA-354106A0"
+                (keyup.enter)="!buscando && buscarOrden()"
               >
               <button (click)="buscarOrden()" [disabled]="buscando || !ordenIdBusqueda">
                 {{ buscando ? 'Buscando...' : 'Buscar' }}
@@ -42,11 +42,11 @@
             <h3>Detalles de la Orden: {{ ordenSeleccionada.id }}</h3>
             <div class="info-cliente">
               <span><strong>Cliente:</strong> {{ ordenSeleccionada.clienteNombre || 'N/A' }}</span>
-              <span><strong>Fecha:</strong> {{ ordenSeleccionada.fecha | date:'dd/MM/yyyy HH:mm' }}</span>
+              <span><strong>Fecha:</strong> {{ ordenSeleccionada.fecha }}</span>
             </div>
             
-            <!-- Medicamentos Comerciales -->
-            <table class="items-table" *ngIf="ordenSeleccionada.items.length > 0">
+            <!-- Medicamentos Comerciales (CORREGIDO: Se removió el ?. para solucionar el error NG8107) -->
+            <table class="items-table" *ngIf="ordenSeleccionada.items && ordenSeleccionada.items.length > 0">
               <thead>
                 <tr>
                   <th>Producto</th>
@@ -65,7 +65,7 @@
               </tbody>
             </table>
 
-            <!-- NEW: Fórmulas Magistrales e Inyecciones de Laboratorio -->
+            <!-- Fórmulas Magistrales (CORREGIDO: Se removió el ?. para solucionar el error NG8107) -->
             <div *ngIf="ordenSeleccionada.itemsFormula && ordenSeleccionada.itemsFormula.length > 0" class="formulas-seccion">
               <h4 class="subtitulo-formulas">Fórmulas Magistrales Preparadas</h4>
               <table class="items-table formulas-table">
@@ -110,6 +110,7 @@
             
             <div *ngIf="errorPago" class="error-msg">{{ errorPago }}</div>
           </div>
+
         </div>
       </div>
     </section>

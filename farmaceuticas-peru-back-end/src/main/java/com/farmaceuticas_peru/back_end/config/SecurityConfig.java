@@ -29,10 +29,11 @@ public class SecurityConfig {
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http, AuthenticationProvider authenticationProvider) throws Exception {
         http
-                .cors(cors -> cors.configurationSource(corsConfigurationSource())) // CORREGIDO: Enlace directo y seguro al origen de CORS
+                .cors(cors -> cors.configurationSource(corsConfigurationSource()))
                 .csrf(csrf -> csrf.disable())
                 .authorizeHttpRequests(auth -> auth
-                        .requestMatchers("/api/auth/login").permitAll()
+                        // CORREGIDO: Se añade "/error" para permitir que Spring muestre el código de falla real (401 o 500)
+                        .requestMatchers("/api/auth/login", "/error").permitAll() 
                         .anyRequest().authenticated()
                 )
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
@@ -42,13 +43,15 @@ public class SecurityConfig {
         return http.build();
     }
 
-    // NEW: Bean explícito de CORS para Spring Security (Evita rebotar peticiones OPTIONS del navegador)
     @Bean
     public CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration configuration = new CorsConfiguration();
         configuration.setAllowedOrigins(Arrays.asList("http://localhost", "http://localhost:80", "http://localhost:4200"));
         configuration.setAllowedMethods(Arrays.asList("GET", "POST", "PUT", "DELETE", "OPTIONS"));
-        configuration.setAllowedHeaders(Arrays.asList("Authorization", "Content-Type", "X-Requested-With"));
+        
+        // CORREGIDO: Cambiado de lista explícita a "*" para permitir todos los headers del navegador
+        configuration.setAllowedHeaders(Arrays.asList("*")); 
+        
         configuration.setAllowCredentials(true);
         
         UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();

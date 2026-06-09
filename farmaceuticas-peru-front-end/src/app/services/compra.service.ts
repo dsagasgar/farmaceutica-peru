@@ -20,4 +20,8 @@ export class CompraService {
     const payload = { items, observaciones };
     return this.http.post<CompraProveedor>(`${this.apiUrl}/${compraId}/registrar-recepcion`, payload);
   }
+
+  getTodasLasCompras(): Observable<CompraProveedor[]> {
+    return this.http.get<CompraProveedor[]>(this.apiUrl);
+  }
 }

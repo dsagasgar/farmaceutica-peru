@@ -2,7 +2,7 @@ package com.farmaceuticas_peru.back_end.model;
 
 import java.math.BigDecimal;
 
-import com.fasterxml.jackson.annotation.JsonBackReference;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -52,6 +52,6 @@ public class ItemVenta {
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "venta_id")
-    @JsonBackReference("venta-items")
+    @JsonIgnore // CORREGIDO: Bloqueo absoluto de serialización cíclica
     private Venta venta;
 }

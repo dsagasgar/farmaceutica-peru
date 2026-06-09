@@ -75,25 +75,25 @@ export interface Venta {
   estado: 'PENDIENTE_PAGO' | 'PAGADO' | 'CANCELADO';
 }
 
+export interface ItemCompra {
+  id?: number;
+  productoId: string;
+  nombreProducto: string;
+  cantidadPedida: number;
+  cantidadRecibida?: number | null;
+  costoUnitario: number;
+}
+
+// CORREGIDO: Añadimos el campo de observaciones para habilitar la auditoría gerencial
 export interface CompraProveedor {
   id: string;
   proveedor: string;
   numeroFactura: string;
-  fechaPedido: string; // ISO Date string
-  fechaRecepcion?: string; // ISO Date string
+  fechaPedido: string;
   items: ItemCompra[];
   total: number;
-  estado: 'PENDIENTE_RECEPCION' | 'RECIBIDO_PARCIAL' | 'RECIBIDO_COMPLETO' | 'PAGADO';
-  observacionesAlmacen?: string;
-}
-
-export interface ItemCompra {
-  id: number;
-  productoId: string;
-  nombreProducto: string;
-  cantidadPedida: number;
-  cantidadRecibida?: number;
-  costoUnitario: number;
+  estado: string;
+  observacionesAlmacen?: string | null; // 👈 CORREGIDO: Alineado con la columna de Spring
 }
 
 export interface AdminStats {

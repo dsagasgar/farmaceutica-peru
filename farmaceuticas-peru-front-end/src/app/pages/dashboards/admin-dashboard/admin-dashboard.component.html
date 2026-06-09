@@ -9,85 +9,186 @@
         <button (click)="logout()" class="logout-btn">Cerrar Sesión</button>
       </div>
     </div>
+    
+    <!-- SUB-NAVBAR DE AUDITORÍA -->
+    <nav class="admin-tabs-nav">
+      <button (click)="cambiarPestana('stats')" [class.tab-active]="pestanaActiva === 'stats'">Métricas Generales</button>
+      <button (click)="cambiarPestana('ventas')" [class.tab-active]="pestanaActiva === 'ventas'">Auditoría de Ventas</button>
+      <button (click)="cambiarPestana('almacen')" [class.tab-active]="pestanaActiva === 'almacen'">Reportes de Almacén</button>
+    </nav>
   </header>
 
   <!-- CONTENIDO PRINCIPAL -->
   <main class="dashboard-main">
-    
-    <!-- ESTADÍSTICAS DINÁMICAS -->
-    <ng-container *ngIf="stats$ | async as stats; else loadingStats">
-      <section class="stats-section">
-        <h2>Estadísticas del Sistema</h2>
-        <div class="stats-grid">
-          <div class="stat-card">
-            <div class="stat-content">
-              <p class="stat-label">Total Usuarios</p>
-              <p class="stat-value">{{ stats.totalUsuarios }}</p>
-            </div>
-          </div>
 
-          <div class="stat-card">
-            <div class="stat-content">
-              <p class="stat-label">Ingresos de Hoy</p>
-              <p class="stat-value">{{ stats.ingresosHoy | currency:'S/ ' }}</p>
-            </div>
+    <!-- ================= SECCIÓN 1: MÉTRICAS Y ESTADÍSTICAS ================= -->
+    <div *ngIf="pestanaActiva === 'stats'" class="animate-fade-in">
+      <ng-container *ngIf="stats$ | async as stats; else loadingStats">
+        <section class="stats-section">
+          <h2>Estadísticas del Sistema</h2>
+          <div class="stats-grid">
+            <div class="stat-card"><div class="stat-content"><p class="stat-label">Total Usuarios</p><p class="stat-value">{{ stats.totalUsuarios }}</p></div></div>
+            <div class="stat-card"><div class="stat-content"><p class="stat-label">Ingresos de Hoy</p><p class="stat-value">{{ stats.ingresosHoy | currency:'S/ ' }}</p></div></div>
+            <div class="stat-card"><div class="stat-content"><p class="stat-label">Total Productos</p><p class="stat-value">{{ stats.totalProductos }}</p></div></div>
+            <div class="stat-card"><div class="stat-content"><p class="stat-label">Ventas de Hoy</p><p class="stat-value">{{ stats.ventasHoy }}</p></div></div>
           </div>
+        </section>
+      </ng-container>
 
-          <div class="stat-card">
-            <div class="stat-content">
-              <p class="stat-label">Total Productos</p>
-              <p class="stat-value">{{ stats.totalProductos }}</p>
+      <ng-container *ngIf="actividadReciente$ | async as actividades; else loadingActivity">
+        <section class="activity-section">
+          <h2>Actividad Reciente del Servidor</h2>
+          <div class="activity-list">
+            <div *ngFor="let item of actividades" class="activity-item">
+              <p class="activity-title">{{ item.descripcion }}</p>
+              <p class="activity-time">{{ item.fecha | date:'medium' }}</p>
             </div>
+            <div *ngIf="actividades.length === 0" class="no-activity">No hay actividad reciente registrada en PostgreSQL.</div>
           </div>
+        </section>
+      </ng-container>
+    </div>
 
-          <div class="stat-card">
-            <div class="stat-content">
-              <p class="stat-label">Ventas de Hoy</p>
-              <p class="stat-value">{{ stats.ventasHoy }}</p>
-            </div>
-          </div>
-        </div>
-      </section>
-    </ng-container>
-
-    <!-- ACCIONES ADMINISTRATIVAS (Restaurado usando tus estilos CSS existentes) -->
-    <section class="actions-section">
-      <h2>Accesos Rápidos de Gestión</h2>
-      <div class="options-grid">
-        <div class="option-card">
-          <h3>Control de Almacén e Inventario</h3>
-          <p>Monitoree stocks globales, alertas críticas de abastecimiento y fechas de vencimiento.</p>
-          <button routerLink="/dashboard/almacen" class="option-btn">Ir a Inventario</button>
-        </div>
+    <!-- ================= SECCIÓN 2: AUDITORÍA DE VENTAS ================= -->
+    <div *ngIf="pestanaActiva === 'ventas'" class="animate-fade-in">
+      <section class="dashboard-section">
+        <h2>Consola de Auditoría Financiera</h2>
+        <p class="section-description">Ingrese el código de cualquier orden para desglosar su árbol relacional completo.</p>
         
-        <div class="option-card">
-          <h3>Auditoría de Fórmulas y Ventas</h3>
-          <p>Revise el historial completo de tickets emitidos por cajeros y preparaciones de químicos.</p>
-          <button routerLink="/dashboard/cajero" class="option-btn">Ver Terminal Caja</button>
-        </div>
-      </div>
-    </section>
-
-    <!-- ACTIVIDAD RECIENTE -->
-    <ng-container *ngIf="actividadReciente$ | async as actividades; else loadingActivity">
-      <section class="activity-section">
-        <h2>Actividad Reciente del Servidor</h2>
-        <div class="activity-list">
-          <div *ngFor="let item of actividades" class="activity-item">
-            <p class="activity-title">{{ item.descripcion }}</p>
-            <p class="activity-time">{{ item.fecha | date:'medium' }}</p>
+        <div class="buscador-container">
+          <div class="input-group">
+            <input type="text" [(ngModel)]="idVentaBusqueda" placeholder="Ej: VENTA-TEST-001" (keyup.enter)="consultarVentaEspecifica()">
+            <button (click)="consultarVentaEspecifica()" [disabled]="buscandoVenta">
+              {{ buscandoVenta ? 'Buscando...' : 'Auditar Venta' }}
+            </button>
           </div>
-          <div *ngIf="actividades.length === 0" class="no-activity">No hay actividad reciente registrada en PostgreSQL.</div>
+          <div *ngIf="errorVenta" class="error-msg">{{ errorVenta }}</div>
+        </div>
+
+        <!-- Ficha de Datos Cruzados Auditados -->
+        <div *ngIf="ventaAuditoria" class="detalle-orden animate-fade-in">
+          <div class="card-auditoria-header">
+            <h3>Documento Electrónico: {{ ventaAuditoria.id }}</h3>
+            <span class="user-role">ESTADO: {{ ventaAuditoria.estado }}</span>
+          </div>
+
+          <!-- TRAZABILIDAD DE EMPLEADOS IMPLICADOS -->
+          <div class="grid-trazabilidad">
+            <div class="card-empleado border-quimico">
+              <p class="label-empleado">Responsable Clínico (Químico)</p>
+              <p class="value-empleado">ID: {{ ventaAuditoria.quimicoId || 'N/A' }}</p>
+            </div>
+            <div class="card-empleado border-cajero">
+              <p class="label-empleado">Operador de Caja (Cajero)</p>
+              <p class="value-empleado">ID: {{ ventaAuditoria.cajeroId || 'N/A' }}</p>
+            </div>
+            <div class="card-empleado border-cliente">
+              <p class="label-empleado">Titular de la Compra (Cliente)</p>
+              <p class="value-empleado">{{ ventaAuditoria.clienteNombre || 'Público General' }}</p>
+            </div>
+          </div>
+
+          <h4>Ítems Comerciales Despachados</h4>
+          <table class="items-table">
+            <thead>
+              <tr>
+                <th>Producto</th>
+                <th>Cantidad</th>
+                <th>Precio de Venta</th>
+                <th>Subtotal</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr *ngFor="let item of ventaAuditoria.items">
+                <td>{{ item.nombreProducto }}</td>
+                <td class="text-center">{{ item.cantidad }}</td>
+                <td>{{ item.precioUnitario | currency:'S/ ' }}</td>
+                <td>{{ item.subtotal | currency:'S/ ' }}</td>
+              </tr>
+              <tr *ngIf="!ventaAuditoria.items || ventaAuditoria.items.length === 0">
+                <td colspan="4" class="placeholder">Esta transacción no contiene medicamentos comerciales.</td>
+              </tr>
+            </tbody>
+          </table>
+
+          <!-- Fórmulas Clínicas -->
+          <div *ngIf="ventaAuditoria.itemsFormula && ventaAuditoria.itemsFormula.length > 0">
+            <h4 style="margin-top: 1.5rem;">Fórmulas Magistrales de Laboratorio Interno</h4>
+            <table class="items-table formulas-table">
+              <thead>
+                <tr>
+                  <th>Fórmula Preparada</th>
+                  <th>Composición Química Registrada</th>
+                  <th>Precio Asignado</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr *ngFor="let formula of ventaAuditoria.itemsFormula">
+                  <td><strong>{{ formula.nombre }}</strong></td>
+                  <td>{{ formula.composicion }}</td>
+                  <td>{{ formula.precio | currency:'S/ ' }}</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+
+          <div class="total-table" style="text-align: right; margin-top: 1.5rem; font-size: 1.2rem;">
+            <strong>Monto Total Auditado: </strong>
+            <span class="total-destacado">{{ ventaAuditoria.total | currency:'S/ ' }}</span>
+          </div>
         </div>
       </section>
-    </ng-container>
+    </div>
 
-    <!-- TEMPLATES DE CARGA (Loading Placeholders) -->
-    <ng-template #loadingStats>
-      <div class="placeholder">Cargando estadísticas en tiempo real...</div>
-    </ng-template>
-    <ng-template #loadingActivity>
-      <div class="placeholder">Cargando bitácora de actividad reciente...</div>
-    </ng-template>
+    <!-- ================= SECCIÓN 3: CONSOLA LOGÍSTICA HISTÓRICA ================= -->
+    <div *ngIf="pestanaActiva === 'almacen'" class="animate-fade-in">
+      <section class="dashboard-section">
+        <h2>Consola de Control de Suministros e Inventario</h2>
+        <p class="section-description">Supervise el flujo de abastecimiento global y los partes de incidencias de recepción.</p>
+
+        <div *ngIf="cargandoCompras" class="placeholder">Conectando con el registro de proveedores...</div>
+        <div *ngIf="!cargandoCompras && comprasAuditoria.length === 0" class="placeholder">
+          No se registran bitácoras de compra en el sistema.
+        </div>
+
+        <!-- CORREGIDO: Contenedor elástico con gap que aplica la separación en desktop de forma nativa -->
+        <div *ngIf="!cargandoCompras && comprasAuditoria.length > 0" class="compras-list">
+          <div *ngFor="let compra of comprasAuditoria" class="compra-card">
+            
+            <div class="card-auditoria-header">
+              <div>
+                <h3 style="margin: 0; color: #0056b3;">{{ compra.proveedor }}</h3>
+                <small style="color: #6c757d;">Factura: {{ compra.numeroFactura }}</small>
+              </div>
+              <span [class]="'badge-status ' + (compra.estado === 'PENDIENTE_RECEPCION' ? 'badge-pendiente' : compra.estado === 'RECIBIDO_COMPLETO' ? 'badge-completo' : 'badge-parcial')">
+                {{ compra.estado }}
+              </span>
+            </div>
+
+            <div style="font-size: 0.9rem; color: #495057; margin-bottom: 1rem;">
+              <p style="margin: 0.25rem 0;"><strong>Código de Orden:</strong> {{ compra.id }}</p>
+              <p style="margin: 0.25rem 0;"><strong>Fecha Emisión Pedido:</strong> {{ compra.fechaPedido | date:'dd/MM/yyyy' }}</p>
+              <p style="margin: 0.25rem 0;"><strong>Inversión de Compra:</strong> {{ compra.total | currency:'S/ ' }}</p>
+            </div>
+
+            <!-- CONDICIONAL 1: Pedido procesado -->
+            <div *ngIf="compra.estado !== 'PENDIENTE_RECEPCION'" class="box-observacion">
+              <h5>Bitácora de Observaciones de Almacén:</h5>
+              <p>{{ compra.observacionesAlmacen || 'Sin incidencias. Mercadería recibida en perfectas condiciones según guía física.' }}</p>
+            </div>
+
+            <!-- CONDICIONAL 2: Pedido en tránsito -->
+            <div *ngIf="compra.estado === 'PENDIENTE_RECEPCION'" class="box-tracking-neutral">
+              📦 <strong>Tracking Logístico:</strong> Orden transmitida al proveedor. Esperando arribo de camiones e inspección física de lotes en muelle.
+            </div>
+
+          </div>
+        </div>
+      </section>
+    </div>
+
+    <!-- TEMPLATES DE ESPERA -->
+    <ng-template #loadingStats><div class="placeholder">Cargando métricas corporativas...</div></ng-template>
+    <ng-template #loadingActivity><div class="placeholder">Sincronizando registros relacionales con PostgreSQL...</div></ng-template>
   </main>
-</div>j
+</div>

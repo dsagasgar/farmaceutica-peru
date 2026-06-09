@@ -2,8 +2,8 @@ package com.farmaceuticas_peru.back_end.service;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
-import java.util.Arrays;
-import java.util.Collections;
+import java.util.ArrayList;
+import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.CommandLineRunner;
@@ -12,12 +12,9 @@ import org.springframework.stereotype.Component;
 
 import com.farmaceuticas_peru.back_end.model.CompraProveedor;
 import com.farmaceuticas_peru.back_end.model.ItemCompra;
-import com.farmaceuticas_peru.back_end.model.ItemVenta;
 import com.farmaceuticas_peru.back_end.model.Producto;
 import com.farmaceuticas_peru.back_end.model.Usuario;
-import com.farmaceuticas_peru.back_end.model.Venta;
 import com.farmaceuticas_peru.back_end.model.enums.EstadoCompra;
-import com.farmaceuticas_peru.back_end.model.enums.EstadoVenta;
 import com.farmaceuticas_peru.back_end.model.enums.Rol;
 import com.farmaceuticas_peru.back_end.repository.CompraProveedorRepository;
 import com.farmaceuticas_peru.back_end.repository.ProductoRepository;
@@ -44,17 +41,14 @@ public class DataSeeder implements CommandLineRunner {
 
     @Override
     public void run(String... args) throws Exception {
-        // Solo ejecutar si no hay usuarios para no duplicar datos en cada reinicio
         if (usuarioRepository.count() == 0) {
             crearUsuarios();
             crearProductos();
             crearComprasPendientes();
-            crearVentaPendiente();
         }
     }
 
     private void crearUsuarios() {
-        // Usuario Administrador
         usuarioRepository.save(Usuario.builder()
                 .id("USER-ADMIN")
                 .email("admin@farmaperu.com")
@@ -63,7 +57,6 @@ public class DataSeeder implements CommandLineRunner {
                 .rol(Rol.ADMINISTRADOR)
                 .build());
 
-        // Usuario Químico Farmacéutico
         usuarioRepository.save(Usuario.builder()
                 .id("USER-QUIMICO")
                 .email("quimico@farmaperu.com")
@@ -72,7 +65,6 @@ public class DataSeeder implements CommandLineRunner {
                 .rol(Rol.QUIMICO_FARMACEUTICO)
                 .build());
 
-        // Usuario Almacenero
         usuarioRepository.save(Usuario.builder()
                 .id("USER-ALMACEN")
                 .email("almacen@farmaperu.com")
@@ -81,7 +73,6 @@ public class DataSeeder implements CommandLineRunner {
                 .rol(Rol.ALMACENERO)
                 .build());
 
-        // Usuario Cajero
         usuarioRepository.save(Usuario.builder()
                 .id("USER-CAJERO")
                 .email("cajero@farmaperu.com")
@@ -126,78 +117,75 @@ public class DataSeeder implements CommandLineRunner {
                 .stock(120).stockVenta(100).categoria("Cuidado Personal").marca("DermaClean")
                 .fechaVencimiento(LocalDate.now().plusYears(2)).lote("LOTE005").formato("Botella 400ml")
                 .build());
-        
-        // Producto sin stock para probar filtros
+
         productoRepository.save(Producto.builder()
                 .id("PROD-006").codigo("7750123123123").nombre("Loratadina 10mg")
                 .descripcion("Antialérgico.").precioUnitario(new BigDecimal("18.00"))
                 .stock(0).stockVenta(0).categoria("Antialérgicos").marca("Genérico")
                 .fechaVencimiento(LocalDate.now().plusMonths(6)).lote("LOTE006").formato("Caja x 10 tabletas")
                 .build());
+
+        // NUEVO: Omeprazol para stock de almacén
+        productoRepository.save(Producto.builder()
+                .id("PROD-007").codigo("7750555666111").nombre("Omeprazol 20mg Protector")
+                .descripcion("Inhibidor de la bomba de protones.").precioUnitario(new BigDecimal("10.00"))
+                .stock(15).stockVenta(10).categoria("Gastrointestinales").marca("Medisana")
+                .fechaVencimiento(LocalDate.now().plusYears(2)).lote("LOTE007").formato("Caja x 30 cápsulas")
+                .build());
+
+        // NUEVO: Losartán para reposición urgente
+        productoRepository.save(Producto.builder()
+                .id("PROD-008").codigo("7750999222444").nombre("Losartán Potásico 50mg")
+                .descripcion("Antihipertensivo regulador.").precioUnitario(new BigDecimal("22.50"))
+                .stock(30).stockVenta(5).categoria("Cardiovasculares").marca("NeoPharma")
+                .fechaVencimiento(LocalDate.now().plusMonths(24)).lote("LOTE008").formato("Caja x 30 tabletas")
+                .build());
     }
 
     private void crearComprasPendientes() {
-        // Compra 1
-        ItemCompra item1 = ItemCompra.builder()
-                .productoId("PROD-001").nombreProducto("Paracetamol 500mg Caja x20")
-                .cantidadPedida(50).costoUnitario(new BigDecimal("10.00"))
-                .build();
+        // COMPRA 1: Distribuidora Farmacéutica
+        List<ItemCompra> items1 = new ArrayList<>();
+        items1.add(ItemCompra.builder().productoId("PROD-001").nombreProducto("Paracetamol 500mg Caja x20").cantidadPedida(50).costoUnitario(new BigDecimal("10.00")).build());
+        items1.add(ItemCompra.builder().productoId("PROD-003").nombreProducto("Ibuprofeno 400mg").cantidadPedida(100).costoUnitario(new BigDecimal("8.50")).build());
 
-        ItemCompra item2 = ItemCompra.builder()
-                .productoId("PROD-003").nombreProducto("Ibuprofeno 400mg")
-                .cantidadPedida(100).costoUnitario(new BigDecimal("8.50"))
-                .build();
-
-        CompraProveedor compra = CompraProveedor.builder()
-                .id("COMPRA-2024-001").proveedor("Distribuidora Farmacéutica S.A.C.")
+        CompraProveedor compra1 = CompraProveedor.builder()
+                .id("COMPRA-2026-001").proveedor("Distribuidora Farmacéutica S.A.C.")
                 .numeroFactura("F001-12345").fechaPedido(LocalDate.now().minusDays(5))
-                .items(Arrays.asList(item1, item2)).total(new BigDecimal("1350.00"))
-                .estado(EstadoCompra.PENDIENTE_RECEPCION)
+                .total(new BigDecimal("1350.00")).estado(EstadoCompra.PENDIENTE_RECEPCION)
                 .build();
-        compraProveedorRepository.save(compra);
+        
+        // CORREGIDO: Sincronizar bidireccionalidad explícita antes de persistir en PostgreSQL
+        items1.forEach(item -> item.setCompra(compra1));
+        compra1.setItems(items1);
+        compraProveedorRepository.save(compra1);
 
-        // Compra 2
-        ItemCompra item3 = ItemCompra.builder()
-                .productoId("PROD-005").nombreProducto("Shampoo Anticaspa 400ml")
-                .cantidadPedida(70).costoUnitario(new BigDecimal("30.00"))
-                .build();
+        // COMPRA 2: Laboratorios DERMA
+        List<ItemCompra> items2 = new ArrayList<>();
+        items2.add(ItemCompra.builder().productoId("PROD-005").nombreProducto("Shampoo Anticaspa 400ml").cantidadPedida(70).costoUnitario(new BigDecimal("30.00")).build());
 
         CompraProveedor compra2 = CompraProveedor.builder()
-                .id("COMPRA-2024-002").proveedor("Laboratorios DERMA S.A.")
+                .id("COMPRA-2026-002").proveedor("Laboratorios DERMA S.A.")
                 .numeroFactura("F002-54321").fechaPedido(LocalDate.now().minusDays(3))
-                .items(Collections.singletonList(item3)).total(new BigDecimal("2100.00"))
-                .estado(EstadoCompra.PENDIENTE_RECEPCION)
+                .total(new BigDecimal("2100.00")).estado(EstadoCompra.PENDIENTE_RECEPCION)
                 .build();
+        
+        items2.forEach(item -> item.setCompra(compra2));
+        compra2.setItems(items2);
         compraProveedorRepository.save(compra2);
-    }
 
-    private void crearVentaPendiente() {
-        ItemVenta itemVenta1 = ItemVenta.builder()
-            .productoId("PROD-001")
-            .nombreProducto("Paracetamol 500mg Caja x20")
-            .cantidad(2)
-            .precioUnitario(new BigDecimal("15.50"))
-            .subtotal(new BigDecimal("31.00"))
-            .build();
+        // NUEVA COMPRA 3: Llenado de stock para Omeprazol y Losartán (Abastecimiento Norte S.A.)
+        List<ItemCompra> items3 = new ArrayList<>();
+        items3.add(ItemCompra.builder().productoId("PROD-007").nombreProducto("Omeprazol 20mg Protector").cantidadPedida(200).costoUnitario(new BigDecimal("5.00")).build());
+        items3.add(ItemCompra.builder().productoId("PROD-008").nombreProducto("Losartán Potásico 50mg").cantidadPedida(150).costoUnitario(new BigDecimal("12.00")).build());
 
-        ItemVenta itemVenta2 = ItemVenta.builder()
-            .productoId("PROD-002")
-            .nombreProducto("Amoxicilina 250mg/5ml Suspensión")
-            .cantidad(1)
-            .precioUnitario(new BigDecimal("25.00"))
-            .subtotal(new BigDecimal("25.00"))
-            .build();
+        CompraProveedor compra3 = CompraProveedor.builder()
+                .id("COMPRA-2026-003").proveedor("Abastecimiento Farmacéutico del Norte S.A.")
+                .numeroFactura("F009-88776").fechaPedido(LocalDate.now().minusDays(1))
+                .total(new BigDecimal("2800.00")).estado(EstadoCompra.PENDIENTE_RECEPCION)
+                .build();
 
-        Venta venta = Venta.builder()
-            .id("VENTA-TEST-001")
-            .fecha(LocalDate.now().minusDays(1))
-            .clienteNombre("Cliente de Prueba")
-            .quimicoId("USER-QUIMICO")
-            .items(Arrays.asList(itemVenta1, itemVenta2))
-            .total(new BigDecimal("56.00"))
-            .estado(EstadoVenta.PENDIENTE_PAGO)
-            .build();
-
-        ventaRepository.save(venta);
+        items3.forEach(item -> item.setCompra(compra3));
+        compra3.setItems(items3);
+        compraProveedorRepository.save(compra3);
     }
 }

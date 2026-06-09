@@ -38,38 +38,41 @@ public class JwtRequestFilter extends OncePerRequestFilter {
         final String jwt;
         final String userEmail;
 
-        // Early exit if the standard Authorization layout is missing
         if (authHeader == null || !authHeader.startsWith("Bearer ")) {
             filterChain.doFilter(request, response);
             return;
         }
 
-        jwt = authHeader.substring(7);
-        userEmail = jwtUtil.extractUsername(jwt);
+        // CORREGIDO: Envolvemos la extracción en un bloque try-catch defensivo
+        try {
+            jwt = authHeader.substring(7);
+            userEmail = jwtUtil.extractUsername(jwt);
 
-        if (userEmail != null && SecurityContextHolder.getContext().getAuthentication() == null) {
-            UserDetails userDetails = this.userDetailsService.loadUserByUsername(userEmail);
-            
-            if (jwtUtil.isTokenValid(jwt, userDetails)) {
+            if (userEmail != null && SecurityContextHolder.getContext().getAuthentication() == null) {
+                UserDetails userDetails = this.userDetailsService.loadUserByUsername(userEmail);
                 
-                // CORREGIDO: Interceptamos y normalizamos las autoridades asegurando el prefijo "ROLE_"
-                Collection<? extends GrantedAuthority> authorities = userDetails.getAuthorities().stream()
-                        .map(auth -> auth.getAuthority().startsWith("ROLE_") 
-                                ? auth 
-                                : new SimpleGrantedAuthority("ROLE_" + auth.getAuthority()))
-                        .toList();
+                if (jwtUtil.isTokenValid(jwt, userDetails)) {
+                    Collection<? extends GrantedAuthority> authorities = userDetails.getAuthorities().stream()
+                            .map(auth -> auth.getAuthority().startsWith("ROLE_") 
+                                    ? auth 
+                                    : new SimpleGrantedAuthority("ROLE_" + auth.getAuthority()))
+                            .toList();
 
-                // Inyectamos la colección de autoridades normalizada dentro del token de contexto
-                UsernamePasswordAuthenticationToken authToken = new UsernamePasswordAuthenticationToken(
-                        userDetails, null, authorities
-                );
-                
-                authToken.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
-                SecurityContextHolder.getContext().setAuthentication(authToken);
-                
-                logger.info("Successfully authenticated principal: " + userEmail + " with roles: " + authorities);
+                    UsernamePasswordAuthenticationToken authToken = new UsernamePasswordAuthenticationToken(
+                            userDetails, null, authorities
+                    );
+                    
+                    authToken.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
+                    SecurityContextHolder.getContext().setAuthentication(authToken);
+                }
             }
+        } catch (io.jsonwebtoken.ExpiredJwtException e) {
+            logger.warn("El token JWT enviado está expirado. Ignorando contexto de autenticación: " + e.getMessage());
+            // No relanzamos la excepción; permitimos que continúe para no tumbar peticiones públicas
+        } catch (io.jsonwebtoken.security.SignatureException | io.jsonwebtoken.MalformedJwtException e) {
+            logger.warn("Estructura de firma de token inválida detectada en el handshake.");
         }
+
         filterChain.doFilter(request, response);
     }
 }

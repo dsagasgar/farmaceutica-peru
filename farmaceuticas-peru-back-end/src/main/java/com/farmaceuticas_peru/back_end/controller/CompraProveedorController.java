@@ -25,13 +25,23 @@ public class CompraProveedorController {
     private final CompraProveedorService compraService;
 
     @GetMapping("/para-recepcion")
-    @PreAuthorize("hasAuthority('ALMACENERO')")
+    // CORREGIDO: Habilitamos hasAnyRole para que el administrador pueda auditar las órdenes pendientes
+    @PreAuthorize("hasAnyRole('ALMACENERO', 'ADMINISTRADOR')")
     public ResponseEntity<List<CompraProveedor>> getComprasParaRecepcion() {
         return ResponseEntity.ok(compraService.getComprasParaRecepcion());
     }
 
+    @GetMapping
+    // CORREGIDO: Nuevo endpoint de auditoría histórica exclusivo para el Administrador
+    @PreAuthorize("hasRole('ADMINISTRADOR')")
+    public ResponseEntity<List<CompraProveedor>> getTodasLasCompras() {
+        // Llama al método de tu servicio que hace un repository.findAll()
+        return ResponseEntity.ok(compraService.getTodasLasCompras()); 
+    }
+
     @PostMapping("/{compraId}/registrar-recepcion")
-    @PreAuthorize("hasAuthority('ALMACENERO')")
+    // CORREGIDO: Permitimos que el administrador también pueda forzar recepciones de emergencia si se requiere
+    @PreAuthorize("hasAnyRole('ALMACENERO', 'ADMINISTRADOR')")
     public ResponseEntity<CompraProveedor> registrarRecepcion(
             @PathVariable String compraId,
             @RequestBody RecepcionRequest payload) {

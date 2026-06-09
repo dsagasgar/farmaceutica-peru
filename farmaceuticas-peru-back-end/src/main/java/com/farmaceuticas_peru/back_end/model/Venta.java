@@ -5,7 +5,6 @@ import java.time.LocalDate;
 import java.util.List;
 
 import com.farmaceuticas_peru.back_end.model.enums.EstadoVenta;
-import com.fasterxml.jackson.annotation.JsonManagedReference;
 
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
@@ -18,15 +17,21 @@ import jakarta.persistence.OneToMany;
 import jakarta.persistence.Table;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
-import lombok.Data;
+import lombok.EqualsAndHashCode;
+import lombok.Getter;
 import lombok.NoArgsConstructor;
+import lombok.Setter;
+import lombok.ToString;
 
 @Entity
 @Table(name = "ventas")
-@Data
+@Getter
+@Setter
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
+@ToString(exclude = {"items", "itemsFormula"})
+@EqualsAndHashCode(exclude = {"items", "itemsFormula"})
 public class Venta {
 
     @Id
@@ -34,12 +39,12 @@ public class Venta {
 
     private LocalDate fecha;
 
-    @OneToMany(mappedBy = "venta", cascade = CascadeType.ALL, fetch = FetchType.EAGER)
-    @JsonManagedReference("venta-items")
+    // CORREGIDO: Cambiado a FetchType.LAZY para mitigar la explosión de uniones redundantes en memoria
+    @OneToMany(mappedBy = "venta", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
     private List<ItemVenta> items;
 
-    @OneToMany(mappedBy = "venta", cascade = CascadeType.ALL, fetch = FetchType.EAGER)
-    @JsonManagedReference("venta-formulas")
+    // CORREGIDO: Cambiado a FetchType.LAZY para permitir la carga fluida por Jackson
+    @OneToMany(mappedBy = "venta", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
     private List<FormulaMagistral> itemsFormula;
 
     private BigDecimal total;

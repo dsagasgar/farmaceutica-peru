@@ -6,20 +6,20 @@ export const authGuard: CanActivateFn = (route: ActivatedRouteSnapshot) => {
   const authService = inject(AuthService);
   const router = inject(Router);
 
-  // 1. OBTENEMOS EL USUARIO UNA SOLA VEZ
   const usuario = authService.obtenerUsuarioActual();
 
-  // Verificar si el usuario está autenticado (Authentication check)
+  // Verificar si el usuario está autenticado (Authentication verification)
   if (!usuario) {
     router.navigate(['/login']);
     return false;
   }
 
-  // Verificar el rol requerido (Role authorization check)
-  const requiredRole = route.data['role'];
+  // CORREGIDO: Recuperamos la lista de roles autorizados para este segmento del cliente
+  const allowedRoles = route.data['roles'] as string[];
 
-  if (requiredRole && usuario.rol !== requiredRole) {
-    // Si intenta acceder a una ruta de otro rol, lo redirigimos a su propio dashboard
+  // CORREGIDO: Validamos si el rol del usuario actual está incluido en los accesos permitidos
+  if (allowedRoles && !allowedRoles.includes(usuario.rol)) {
+    
     const rutaPorRol: Record<string, string> = {
       'ADMINISTRADOR': '/dashboard/administrador',
       'CAJERO': '/dashboard/cajero',
@@ -27,7 +27,7 @@ export const authGuard: CanActivateFn = (route: ActivatedRouteSnapshot) => {
       'QUIMICO_FARMACEUTICO': '/dashboard/quimico'
     };
     
-    const rutaUsuario = rutaPorRol[usuario.rol];
+    const rutaUsuario = rutaPorRol[usuario.rol] || '/login';
     router.navigate([rutaUsuario]);
     return false;
   }
