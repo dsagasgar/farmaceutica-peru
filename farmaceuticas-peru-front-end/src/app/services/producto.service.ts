@@ -9,9 +9,10 @@ import { environment } from '../../environments/environment';
 })
 export class ProductoService {
   private http = inject(HttpClient);
-  private apiUrl = `${environment.apiUrl}/productos`;
+  
+  private apiUrl = `${environment.apiUrl}/api/productos`;
 
-  // Para la vista del QF
+  // Para la vista del QF (Químico Farmacéutico)
   buscarProductosParaVenta(term: string): Observable<Producto[]> {
     const params = new HttpParams().set('nombre', term);
     return this.http.get<Producto[]>(`${this.apiUrl}/venta`, { params });
@@ -24,6 +25,7 @@ export class ProductoService {
   }
 
   actualizarStockVenta(id: string, stockVenta: number): Observable<Producto> {
+    // El payload coincide exactamente con la estructura esperada por StockVentaRequest
     return this.http.put<Producto>(`${this.apiUrl}/${id}/stock-venta`, { stockVenta });
   }
 }

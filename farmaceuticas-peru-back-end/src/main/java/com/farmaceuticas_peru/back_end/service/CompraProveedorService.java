@@ -72,4 +72,8 @@ public class CompraProveedorService {
 
         return compraRepository.save(compra);
     }
+
+    public List<CompraProveedor> getTodasLasCompras() {
+        return compraRepository.findAll();
+    }
 }

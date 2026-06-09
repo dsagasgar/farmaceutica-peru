@@ -1,4 +1,5 @@
 <div class="dashboard-container">
+  <!-- ENCABEZADO (Cohesive header bar matching our style ecosystem) -->
   <header class="dashboard-header">
     <div class="header-content">
       <h1>Panel del Químico Farmacéutico</h1>
@@ -10,33 +11,41 @@
     </div>
   </header>
 
+  <!-- CONTENIDO PRINCIPAL -->
   <main class="dashboard-main">
-    <section class="dashboard-section">
+    
+    <!-- Sección 1: Consulta del Catálogo de Productos Reactivo -->
+    <section class="dashboard-section" *ngIf="!mostrandoFormularioPedido">
       <h2 class="section-title">Consulta de Productos</h2>
       <p class="section-description">
-        Busque productos en el inventario para ver detalles, stock y precios.
+        Busque productos en el inventario para ver detalles, stock y precios en tiempo real.
       </p>
       <div class="section-content">
         <app-catalogo-productos></app-catalogo-productos>
       </div>
     </section>
 
+    <!-- Sección 2: Gestión de Órdenes de Mostrador (Order Ticket Dispatcher) -->
     <section class="dashboard-section">
-      <h2 class="section-title">Nuevo Pedido</h2>
+      <h2 class="section-title">Nuevo Pedido / Fórmula Magistral</h2>
       <p class="section-description">
-        Tome nota de los productos para un cliente y genere una orden de venta.
+        Tome nota de los requerimientos del cliente para generar un ticket de cobro en mostrador.
       </p>
+      
       <div class="section-content">
+        <!-- Vista resumida inicial -->
         <div *ngIf="!mostrandoFormularioPedido">
           <button class="action-btn" (click)="iniciarNuevoPedido()">Iniciar Nuevo Pedido</button>
           
+          <!-- Alerta de éxito con el ID/UUID devuelto por la base de datos en PostgreSQL -->
           <div *ngIf="ordenGenerada" class="orden-generada-info animate-fade-in">
-            <p><strong>¡Orden generada con éxito!</strong></p>
-            <p>Entregue el siguiente ID al cliente para que realice el pago en caja:</p>
+            <p class="success-title">🎉 ¡Orden de Venta Registrada con Éxito!</p>
+            <p>Entregue el siguiente código de ticket al cliente para que liquide el pago en la caja terminal:</p>
             <div class="orden-id">{{ ordenGenerada.id }}</div>
           </div>
         </div>
 
+        <!-- Formulario completo de pedido inyectado de forma asíncrona -->
         <app-nuevo-pedido 
           *ngIf="mostrandoFormularioPedido"
           (pedidoGenerado)="onPedidoGenerado($event)"

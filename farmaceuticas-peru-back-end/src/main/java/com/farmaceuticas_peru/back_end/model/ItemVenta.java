@@ -2,7 +2,7 @@ package com.farmaceuticas_peru.back_end.model;
 
 import java.math.BigDecimal;
 
-import com.fasterxml.jackson.annotation.JsonBackReference;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -15,15 +15,22 @@ import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
-import lombok.Data;
+import lombok.EqualsAndHashCode;
+import lombok.Getter;
 import lombok.NoArgsConstructor;
+import lombok.Setter;
+import lombok.ToString;
 
 @Entity
 @Table(name = "items_venta")
-@Data
+// CORREGIDO: Reemplazamos @Data por anotaciones granulares independientes
+@Getter
+@Setter
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
+@ToString(exclude = "venta") // Rompe el bucle en el método toString()
+@EqualsAndHashCode(exclude = "venta") // Rompe el bucle en colecciones de persistencia (persistence contexts)
 public class ItemVenta {
 
     @Id
@@ -45,6 +52,6 @@ public class ItemVenta {
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "venta_id")
-    @JsonBackReference("venta-items")
+    @JsonIgnore // CORREGIDO: Bloqueo absoluto de serialización cíclica
     private Venta venta;
 }

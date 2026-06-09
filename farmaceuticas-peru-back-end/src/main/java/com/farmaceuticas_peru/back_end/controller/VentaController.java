@@ -27,14 +27,15 @@ public class VentaController {
     private final VentaService ventaService;
 
     @PostMapping
-    @PreAuthorize("hasRole('QUIMICO_FARMACEUTICO')")
+    @PreAuthorize("hasRole('QUIMICO_FARMACEUTICO')") 
     public ResponseEntity<Venta> crearVenta(@RequestBody Venta venta) {
         Venta nuevaVenta = ventaService.crearVenta(venta);
         return new ResponseEntity<>(nuevaVenta, HttpStatus.CREATED);
     }
 
     @GetMapping("/{id}")
-    @PreAuthorize("hasAnyAuthority('ROLE_CAJERO', 'ROLE_QUIMICO_FARMACEUTICO')")
+    // CORREGIDO: Se añade 'ADMINISTRADOR' para permitir la auditoría de órdenes de venta y fórmulas
+    @PreAuthorize("hasAnyRole('CAJERO', 'QUIMICO_FARMACEUTICO', 'ADMINISTRADOR')") 
     public ResponseEntity<Venta> buscarOrdenPorId(@PathVariable String id) {
         Optional<Venta> venta = ventaService.buscarOrdenPorId(id);
         return venta.map(ResponseEntity::ok)
@@ -42,7 +43,8 @@ public class VentaController {
     }
 
     @PutMapping("/{id}/registrar-pago")
-    @PreAuthorize("hasAuthority('ROLE_CAJERO')")
+    // CORREGIDO: Se añade 'ADMINISTRADOR' para permitir cierres o transacciones de supervisión
+    @PreAuthorize("hasAnyRole('CAJERO', 'ADMINISTRADOR')") 
     public ResponseEntity<Venta> registrarPago(@PathVariable String id, @RequestBody Map<String, String> payload) {
         String cajeroId = payload.get("cajeroId");
         if (cajeroId == null || cajeroId.isEmpty()) {

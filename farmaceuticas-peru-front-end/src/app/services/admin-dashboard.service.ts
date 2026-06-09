@@ -9,7 +9,7 @@ import { environment } from '../../environments/environment';
 })
 export class AdminDashboardService {
   private http = inject(HttpClient);
-  private apiUrl = `${environment.apiUrl}/admin/dashboard`;
+  private apiUrl = `${environment.apiUrl}/api/admin/dashboard`;
 
   getStats(): Observable<AdminStats> {
     return this.http.get<AdminStats>(`${this.apiUrl}/stats`);

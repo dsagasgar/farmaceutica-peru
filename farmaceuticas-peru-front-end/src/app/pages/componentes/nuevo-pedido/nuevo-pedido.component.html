@@ -13,7 +13,8 @@
     >
     <div *ngIf="productosFiltrados.length > 0" class="search-results">
       <div *ngFor="let p of productosFiltrados" (click)="agregarProducto(p)" class="result-item">
-        {{ p.nombre }} - <strong>Stock: {{ p.stock }}</strong>
+        <!-- CORREGIDO: Muestra stockVenta para no inducir al error al operador -->
+        {{ p.nombre }} - <strong>Disponible: {{ p.stockVenta }}</strong>
       </div>
     </div>
   </div>
@@ -24,13 +25,17 @@
     <div *ngFor="let item of pedidoActual" class="pedido-item">
       <span>{{ item.producto.nombre }}</span>
       <div class="item-controls">
-        <input type="number" [min]="1" [max]="item.producto.stock" [value]="item.cantidad" (change)="actualizarCantidad(item.producto.id, $event)">
+        <!-- CORREGIDO: El límite máximo permitido es stockVenta -->
+        <input 
+          type="number" 
+          [min]="1" 
+          [max]="item.producto.stockVenta" 
+          [value]="item.cantidad" 
+          (change)="actualizarCantidad(item.producto.id, $event)"
+        >
         <span>x {{ item.producto.precioUnitario | currency:'S/ ' }} = {{ (item.producto.precioUnitario * item.cantidad) | currency:'S/ ' }}</span>
         <button (click)="eliminarProducto(item.producto.id)" class="delete-btn">&times;</button>
       </div>
-    </div>
-    <div class="total-pedido">
-      <strong>Total: {{ totalPedido | currency:'S/ ' }}</strong>
     </div>
   </div>
 
@@ -65,11 +70,20 @@
     </div>
   </div>
 
-
   <!-- Datos del Cliente y Acciones -->
-  <div *ngIf="pedidoActual.length > 0" class="form-group">
+  <!-- MODIFICADO: Ahora se muestra si hay productos O si hay fórmulas en la orden -->
+  <div *ngIf="pedidoActual.length > 0 || formulasEnPedido.length > 0" class="form-group">
     <label for="cliente-nombre">Nombre del Cliente:</label>
     <input type="text" id="cliente-nombre" [(ngModel)]="clienteNombre" placeholder="Nombre para la boleta/factura">
+  </div>
+
+  <div class="total-pedido" *ngIf="totalPedido > 0">
+    <strong>Total General: {{ totalPedido | currency:'S/ ' }}</strong>
+  </div>
+
+  <!-- Panel de alertas para capturar excepciones de red o base de datos (Database tracking alert) -->
+  <div *ngIf="errorMensaje" class="error-alert">
+    {{ errorMensaje }}
   </div>
 
   <div class="acciones">

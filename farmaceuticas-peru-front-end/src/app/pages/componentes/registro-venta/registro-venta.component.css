@@ -50,89 +50,87 @@ h1 {
   padding-bottom: 0.75rem;
 }
 
-.form-group {
-  margin-bottom: 1rem;
+/* ==========================================================================
+   NUEVO: Sección del Buscador de Tickets (Order Search Layout)
+   ========================================================================== */
+.search-section {
+  margin-bottom: 2rem;
 }
 
-label {
-  display: block;
-  margin-bottom: 0.5rem;
-  color: var(--gray-900);
-  font-weight: 600;
-  font-size: 0.9rem;
+.search-box {
+  display: flex;
+  gap: 1rem;
+  margin-top: 0.5rem;
 }
 
-input[type="text"],
-input[type="number"],
-select,
-textarea {
-  width: 100%;
-  padding: 0.75rem;
-  border: 2px solid var(--gray-400);
-  border-radius: 6px;
-  font-family: inherit;
-  font-size: 1rem;
-  box-sizing: border-box;
-}
-
-input:focus,
-select:focus,
-textarea:focus {
-  outline: none;
-  border-color: var(--bright-blue);
-}
-
-.add-producto {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 0.75rem;
-  margin-bottom: 1.5rem;
-}
-
-.search-input {
-  grid-column: 1 / -1;
-}
-
-.cantidad-input {
-  grid-column: 2 / 3;
-  width: 100%;
-}
-
-.btn-agregar {
-  grid-column: 1 / -1;
-  padding: 0.75rem;
-  background: var(--red-to-pink-to-purple-horizontal-gradient);
+.btn-buscar {
+  padding: 0.75rem 1.5rem;
+  background: var(--bright-blue);
   color: white;
   border: none;
   border-radius: 6px;
   cursor: pointer;
   font-weight: 600;
+  font-size: 1rem;
+  white-space: nowrap;
+  transition: opacity 0.2s ease;
 }
 
-.btn-agregar:hover {
+.btn-buscar:hover {
   opacity: 0.9;
 }
 
-.items-list {
-  margin-top: 1rem;
+/* ==========================================================================
+   NUEVO: Campos de Vista Estática (Read-Only State Forms)
+   ========================================================================== */
+.static-group {
+  margin-bottom: 1.25rem;
 }
 
-.item-header {
-  display: grid;
-  grid-template-columns: 1.5fr 1fr 1fr 1fr 0.8fr;
-  gap: 0.5rem;
+.static-group label {
+  display: block;
+  margin-bottom: 0.4rem;
+  color: var(--gray-700);
   font-weight: 600;
-  color: var(--gray-900);
-  padding: 0.75rem;
-  background: var(--gray-400);
-  border-radius: 6px;
-  margin-bottom: 0.5rem;
   font-size: 0.85rem;
 }
 
-.item-row {
+.static-value {
+  background: #f8f9fa;
+  padding: 0.75rem;
+  border: 1px solid var(--gray-400);
+  border-radius: 6px;
+  margin: 0;
+  color: var(--gray-900);
+  font-size: 1rem;
+  font-weight: 500;
+}
+
+.badge {
+  display: inline-block;
+  padding: 0.35rem 0.75rem;
+  border-radius: 4px;
+  font-weight: 700;
+  font-size: 0.85rem;
+}
+
+.badge-pendiente {
+  background-color: #ffeeba;
+  color: #856404;
+  border: 1px solid #ffeeba;
+}
+
+/* ==========================================================================
+   MODIFICADO: Rejillas de Tablas Sincronizadas (Grid Column Realignment)
+   ========================================================================== */
+.items-list, .formulas-list {
+  margin-top: 1rem;
+}
+
+/* Rediseñado a 4 columnas al remover la celda de eliminación de ítems */
+.item-header, .item-row {
   display: grid;
-  grid-template-columns: 1.5fr 1fr 1fr 1fr 0.8fr;
+  grid-template-columns: 2fr 1fr 1fr 1fr;
   gap: 0.5rem;
   padding: 0.75rem;
   background: var(--gray-400);
@@ -142,29 +140,63 @@ textarea:focus {
   font-size: 0.9rem;
 }
 
+.item-header {
+  font-weight: 600;
+  color: var(--gray-900);
+  font-size: 0.85rem;
+}
+
+/* Rejilla específica de 3 columnas para Fórmulas Magistrales */
+.subtitle-formulas {
+  font-size: 1.1rem;
+  margin: 2rem 0 1rem 0;
+  color: var(--bright-blue);
+  border-bottom: 2px dashed var(--gray-400);
+  padding-bottom: 0.5rem;
+}
+
+.formula-header, .formula-row {
+  grid-template-columns: 2fr 2fr 1fr;
+}
+
+.text-truncate {
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
 .subtotal {
   font-weight: 600;
   color: var(--bright-blue);
 }
 
-.btn-eliminar {
-  padding: 0.4rem 0.6rem;
-  background: var(--hot-red);
-  color: white;
-  border: none;
-  border-radius: 4px;
-  cursor: pointer;
-  font-size: 0.8rem;
-}
-
-.no-items {
-  text-align: center;
-  padding: 1.5rem;
-  background: var(--gray-400);
+/* ==========================================================================
+   NUEVO: Alertas del Servidor de Base de Datos (Database Response Alerts)
+   ========================================================================== */
+.alert {
+  padding: 1rem;
+  margin-bottom: 2rem;
   border-radius: 6px;
-  color: var(--gray-700);
+  text-align: center;
+  font-weight: 600;
+  font-size: 1rem;
 }
 
+.alert-error {
+  background-color: #f8d7da;
+  border: 1px solid #f5c6cb;
+  color: #721c24;
+}
+
+.alert-exito {
+  background-color: #d4edda;
+  border: 1px solid #c3e6cb;
+  color: #155724;
+}
+
+/* ==========================================================================
+   Resumen de la Orden y Botones de Acción
+   ========================================================================== */
 .resumen-section {
   background: white;
   padding: 2rem;
@@ -180,51 +212,26 @@ textarea:focus {
 
 .resumen-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  grid-template-columns: 1fr;
   gap: 1rem;
-  margin-bottom: 2rem;
-}
-
-.resumen-item {
-  background: var(--gray-400);
-  padding: 1rem;
-  border-radius: 6px;
-  display: flex;
-  justify-content: space-between;
-}
-
-.resumen-item.total {
-  grid-column: 1 / -1;
-  background: var(--red-to-pink-to-purple-horizontal-gradient);
-  color: white;
-  font-weight: 600;
-  font-size: 1.1rem;
-}
-
-.label {
-  color: var(--gray-700);
-}
-
-.resumen-item.total .label {
-  color: white;
-}
-
-.valor {
-  font-weight: 600;
-  color: var(--bright-blue);
-}
-
-.resumen-item.total .valor {
-  color: white;
-}
-
-.notas {
   margin-bottom: 1.5rem;
 }
 
-textarea {
-  resize: vertical;
-  min-height: 80px;
+.resumen-item.total {
+  background: var(--red-to-pink-to-purple-horizontal-gradient);
+  color: white;
+  font-weight: 600;
+  font-size: 1.2rem;
+  padding: 1.25rem;
+  border-radius: 6px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.resumen-item.total .label,
+.resumen-item.total .valor {
+  color: white;
 }
 
 .acciones {
@@ -235,12 +242,13 @@ textarea {
 .btn-limpiar,
 .btn-emitir {
   flex: 1;
-  padding: 0.75rem;
+  padding: 0.85rem;
   border: none;
   border-radius: 6px;
   cursor: pointer;
   font-weight: 600;
   font-size: 1rem;
+  transition: opacity 0.2s ease;
 }
 
 .btn-limpiar {
@@ -261,18 +269,44 @@ textarea {
   opacity: 0.9;
 }
 
-.btn-emitir:disabled {
+.btn-emitir:disabled,
+.btn-limpiar:disabled {
   opacity: 0.5;
   cursor: not-allowed;
 }
 
+/* ==========================================================================
+   Media Queries (Responsive Adaptations)
+   ========================================================================== */
 @media (max-width: 768px) {
+  .header {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 1rem;
+  }
+
+  .ticket-info {
+    flex-direction: column;
+    gap: 0.5rem;
+  }
+
+  .search-box {
+    flex-direction: column;
+  }
+
   .content-grid {
     grid-template-columns: 1fr;
   }
 
-  .add-producto {
+  .item-header {
+    display: none; /* Hide tabular headers on small mobile displays */
+  }
+
+  .item-row, .formula-row {
     grid-template-columns: 1fr;
+    text-align: left;
+    gap: 0.25rem;
+    padding: 1rem;
   }
 
   .acciones {

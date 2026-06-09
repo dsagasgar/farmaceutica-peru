@@ -1,4 +1,4 @@
-import { Component, inject, ChangeDetectorRef } from '@angular/core';
+import { Component, inject, ChangeDetectorRef, NgZone } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
@@ -18,8 +18,9 @@ export class CajeroDashboardComponent {
   private ventaService = inject(VentaService);
   private router = inject(Router);
   private cdr = inject(ChangeDetectorRef);
+  private ngZone = inject(NgZone); // NEW: Core execution micro-task manager
 
-  usuario: Usuario | null = null;
+  usuario: Usuario | null = this.authService.obtenerUsuarioActual();
   ordenIdBusqueda: string = '';
   buscando: boolean = false;
   errorBusqueda: string = '';
@@ -27,29 +28,43 @@ export class CajeroDashboardComponent {
   procesandoPago: boolean = false;
   errorPago: string = '';
 
-  constructor() {
-    this.usuario = this.authService.obtenerUsuarioActual();
-  }
-
   buscarOrden(): void {
-    if (!this.ordenIdBusqueda) return;
+    const idLimpio = this.ordenIdBusqueda ? this.ordenIdBusqueda.trim() : '';
+    if (!idLimpio) return;
+
     this.buscando = true;
     this.errorBusqueda = '';
-    this.ordenSeleccionada = null;
     this.errorPago = '';
-    this.ventaService.buscarOrdenPorId(this.ordenIdBusqueda).subscribe({
+    this.ordenSeleccionada = null;
+    this.cdr.detectChanges(); 
+
+    this.ventaService.buscarOrdenPorId(idLimpio).subscribe({
       next: (orden) => {
-        if (orden) {
-          this.ordenSeleccionada = orden;
-        } else {
-          this.errorBusqueda = `No se encontró ninguna orden con el ID "${this.ordenIdBusqueda}".`;
-        }
-        this.buscando = false;
+        // CORREGIDO: NgZone fuerza la sincronización de la UI anulando cuelgues de micro-tareas
+        this.ngZone.run(() => {
+          this.buscando = false;
+          if (orden) {
+            this.ordenSeleccionada = orden;
+          } else {
+            this.errorBusqueda = `No se encontró ninguna orden con el ID "${idLimpio}".`;
+          }
+          this.cdr.detectChanges();
+        });
       },
       error: (err) => {
-        this.errorBusqueda = 'Ocurrió un error al buscar la orden.';
-        console.error(err);
-        this.buscando = false;
+        // CORREGIDO: Garantía absoluta de desbloqueo del formulario ante errores de red o 404
+        this.ngZone.run(() => {
+          this.buscando = false;
+          this.ordenSeleccionada = null;
+          
+          if (err.status === 404) {
+            this.errorBusqueda = `No se encontró ninguna orden con el ID "${idLimpio}".`;
+          } else {
+            this.errorBusqueda = 'El servidor de Spring Boot denegó el acceso o se encuentra fuera de línea.';
+          }
+          console.error('Database communication failure payload:', err);
+          this.cdr.detectChanges();
+        });
       }
     });
   }
@@ -58,16 +73,23 @@ export class CajeroDashboardComponent {
     if (!this.ordenSeleccionada || !this.usuario) return;
     this.procesandoPago = true;
     this.errorPago = '';
+    this.cdr.detectChanges();
+
     this.ventaService.registrarPago(this.ordenSeleccionada.id, this.usuario.id).subscribe({
       next: (ordenActualizada) => {
-        this.ordenSeleccionada = ordenActualizada;
-        this.procesandoPago = false;
-        this.cdr.detectChanges(); 
+        this.ngZone.run(() => {
+          this.ordenSeleccionada = ordenActualizada;
+          this.procesandoPago = false;
+          this.cdr.detectChanges();
+        });
       },
       error: (err) => {
-        this.errorPago = err.message || 'Ocurrió un error al registrar el pago.';
-        console.error(err);
-        this.procesandoPago = false;
+        this.ngZone.run(() => {
+          this.errorPago = err.message || 'Ocurrió un error al registrar el pago.';
+          console.error('Payment transaction rollback trigger:', err);
+          this.procesandoPago = false;
+          this.cdr.detectChanges();
+        });
       }
     });
   }

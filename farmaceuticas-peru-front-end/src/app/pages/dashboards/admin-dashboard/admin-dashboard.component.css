@@ -60,7 +60,41 @@ h1 {
 }
 
 .logout-btn:hover {
-  background: #c82333;
+  background-color: #c82333;
+}
+
+/* SUB-NAVBAR: Pestañas de control gerencial */
+.admin-tabs-nav {
+  display: flex;
+  gap: 0.5rem;
+  max-width: 1200px;
+  margin: 1rem auto 0 auto;
+  width: 100%;
+  border-bottom: 2px solid #e9ecef;
+}
+
+.admin-tabs-nav button {
+  background: transparent;
+  border: none;
+  padding: 0.75rem 1.5rem;
+  font-size: 0.95rem;
+  font-weight: 500;
+  color: #6c757d;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  border-radius: 6px 6px 0 0;
+}
+
+.admin-tabs-nav button:hover {
+  color: #0056b3;
+  background-color: #f8f9fa;
+}
+
+.admin-tabs-nav button.tab-active {
+  color: #0056b3;
+  border-bottom: 3px solid #0056b3;
+  font-weight: 600;
+  background-color: #e8f0fe;
 }
 
 .dashboard-main {
@@ -81,7 +115,10 @@ section {
 }
 
 h2 {
-  font-size: 1.25rem; color: #343a40; margin: 0 0 1.5rem 0; font-weight: 600;
+  font-size: 1.25rem; 
+  color: #343a40; 
+  margin: 0 0 1.5rem 0; 
+  font-weight: 600;
 }
 
 /* ESTADÍSTICAS */
@@ -121,52 +158,118 @@ h2 {
   font-weight: 700;
 }
 
-/* OPCIONES */
-.options-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
-  gap: 1.5rem;
+/* AUDITORÍA COMPONENTES */
+.buscador-container {
+  margin-bottom: 1.5rem;
 }
 
-.option-card {
+/* LISTA DE COMPRAS: Fuerza la distribución vertical controlada */
+.compras-list {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem; /* CORREGIDO: Espaciado homogéneo garantizado entre tarjetas consecutivas */
+  width: 100%;
+}
+
+/* COMPRA CARD (CORREGIDO - GLOBAL): Ahora respira correctamente en Desktop y Mobile */
+.compra-card {
   background: white;
-  padding: 2rem;
-  border-radius: 8px;
   border: 1px solid #dee2e6;
-  transition: box-shadow 0.2s ease, border-color 0.2s ease;
+  border-radius: 8px;
+  padding: 1.5rem;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.02);
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+  width: 100%;
+  box-sizing: border-box;
 }
 
-.option-card:hover {
+.compra-card:hover {
   border-color: #0056b3;
   box-shadow: 0 4px 8px rgba(0,0,0,0.05);
 }
 
-.option-card h3 {
-  margin: 0 0 0.5rem 0;
-  color: #343a40;
-  font-size: 1.1rem;
+.card-auditoria-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  border-bottom: 2px solid #f1f3f5;
+  padding-bottom: 0.75rem;
+  margin-bottom: 1.25rem;
 }
 
-.option-card p {
-  margin: 0 0 1.5rem 0;
-  color: #6c757d;
-  font-size: 0.9rem;
-  flex-grow: 1;
+.grid-trazabilidad {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 1rem;
+  margin-bottom: 1.5rem;
 }
 
-.option-btn {
-  background-color: #0056b3;
-  color: white;
-  border: none;
-  padding: 0.7rem 1.5rem;
+.card-empleado {
+  background: #f8f9fa;
+  padding: 0.85rem 1.25rem;
   border-radius: 6px;
-  cursor: pointer;
-  font-weight: 600;
-  transition: background-color 0.2s ease;
 }
 
-.option-btn:hover {
-  background-color: #004494;
+.card-empleado p {
+  margin: 0;
+}
+
+.label-empleado {
+  font-size: 0.8rem;
+  color: #6c757d;
+  margin-bottom: 0.25rem;
+}
+
+.value-empleado {
+  font-weight: 600;
+  color: #212529;
+}
+
+.border-quimico { border-left: 4px solid #0056b3; }
+.border-cajero { border-left: 4px solid #28a745; }
+.border-cliente { border-left: 4px solid #fd7e14; }
+
+/* BADGES DE SEGUIMIENTO LOGÍSTICO */
+.badge-status {
+  padding: 0.25rem 0.75rem;
+  border-radius: 12px;
+  font-size: 0.8rem;
+  font-weight: 600;
+  text-transform: uppercase;
+}
+
+.badge-pendiente { background-color: #ffe8cc; color: #d9480f; }
+.badge-completo { background-color: #d3f9d8; color: #2b8a3e; }
+.badge-parcial { background-color: #e9ecef; color: #495057; }
+
+/* BITÁCORAS DE INSPECCIÓN */
+.box-observacion {
+  background-color: #fff9db;
+  border: 1px solid #fff3bf;
+  border-left: 5px solid #f59f00;
+  padding: 1rem;
+  border-radius: 4px;
+}
+
+.box-tracking-neutral {
+  background-color: #f1f3f5;
+  border-left: 5px solid #868e96;
+  padding: 1rem;
+  border-radius: 4px;
+  color: #495057;
+}
+
+.box-observacion h5 {
+  margin: 0 0 0.5rem 0;
+  color: #f59f00;
+  font-size: 0.95rem;
+  font-weight: 600;
+}
+
+.box-observacion p {
+  margin: 0;
+  font-style: italic;
+  color: #664d03;
 }
 
 /* ACTIVIDAD */
@@ -196,6 +299,53 @@ h2 {
   border-radius: 6px; color: #6c757d; margin-top: 1rem;
 }
 
+/* ==========================================================================
+   TABLAS DE AUDITORÍA: Ítems Comerciales y Fórmulas
+   ========================================================================== */
+.items-table {
+  width: 100%;
+  border-collapse: collapse; /* CORREGIDO: Elimina los espacios dobles entre celdas */
+  margin: 1rem 0 1.5rem 0;
+  font-size: 0.95rem;
+  background-color: white;
+}
+
+.items-table th {
+  background-color: #f8f9fa;
+  color: #495057;
+  font-weight: 600;
+  text-align: left;
+  padding: 0.85rem 1.25rem; /* 👈 CORREGIDO: Otorga el colchón de aire horizontal y vertical */
+  border-bottom: 2px solid #dee2e6;
+}
+
+.items-table td {
+  padding: 0.85rem 1.25rem; /* 👈 CORREGIDO: Separa los nombres de los precios y cantidades */
+  border-bottom: 1px solid #e9ecef;
+  color: #212529;
+  vertical-align: middle;
+}
+
+/* Efecto cebra sutil para facilitar la lectura visual (scanability) */
+.items-table tbody tr:nth-child(even) {
+  background-color: #fcfcfc;
+}
+
+.items-table tbody tr:hover {
+  background-color: #f1f3f5;
+}
+
+/* UTILITARIOS DE ALINEACIÓN */
+.text-center {
+  text-align: center !important;
+}
+
+.total-destacado {
+  color: #0056b3;
+  font-weight: 700;
+  font-size: 1.25rem;
+}
+
 @media (max-width: 768px) {
   .header-top {
     flex-direction: column;
@@ -212,8 +362,24 @@ h2 {
     gap: 0.75rem;
   }
 
+  .admin-tabs-nav {
+    flex-direction: column;
+    align-items: stretch;
+    border-bottom: none;
+    gap: 0.25rem;
+  }
+
+  .admin-tabs-nav button {
+    border-radius: 4px;
+    border: 1px solid #dee2e6;
+  }
+
+  .admin-tabs-nav button.tab-active {
+    border-bottom: 1px solid #0056b3;
+  }
+
   .stats-grid,
-  .options-grid {
+  .grid-trazabilidad {
     grid-template-columns: 1fr;
   }
 }

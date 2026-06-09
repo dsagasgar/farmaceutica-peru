@@ -1,4 +1,4 @@
-import { Component } from '@angular/core';
+import { Component, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
@@ -12,15 +12,14 @@ import { AuthService } from '../../services/auth.service';
   styleUrl: './login.component.css'
 })
 export class LoginComponent {
-  email: string = '';
-  password: string = '';
-  error: string = '';
-  procesando: boolean = false;
+  // MODERNIZED: Clean dependency injection using functional tokens
+  private authService = inject(AuthService);
+  private router = inject(Router);
 
-  constructor(
-    private authService: AuthService,
-    private router: Router
-  ) {}
+  email = '';
+  password = '';
+  error = '';
+  procesando = false;
 
   onLogin(): void {
     this.error = '';
@@ -30,32 +29,31 @@ export class LoginComponent {
       return;
     }
 
-    // Mostrar que está procesando
     this.procesando = true;
 
     this.authService.login(this.email, this.password).subscribe({
       next: (response) => {
         this.procesando = false;
-        // Si el login es exitoso, response tendrá el usuario y navegaremos.
         const usuario = response.user;
         
+        // Symmetrical routing contract mapping matching our dashboards path layouts
         const rutaPorRol: Record<string, string> = {
           'ADMINISTRADOR': '/dashboard/administrador',
           'CAJERO': '/dashboard/cajero',
           'ALMACENERO': '/dashboard/almacen',
           'QUIMICO_FARMACEUTICO': '/dashboard/quimico'
         };
+        
         this.router.navigate([rutaPorRol[usuario.rol]]);
       },
       error: (err) => {
         this.procesando = false;
-        // Si el error es 401, son credenciales inválidas. Otros errores son de red/servidor.
         if (err.status === 401) {
           this.error = 'Email o contraseña incorrectos.';
         } else {
-          this.error = 'No se pudo conectar con el servidor. Intente más tarde.';
+          this.error = 'No se pudo conectar con el servidor de Spring Boot. Intente más tarde.';
         }
-        console.error('Error de conexión:', err);
+        console.error('Authentication gateway network failure:', err);
       }
     });
   }

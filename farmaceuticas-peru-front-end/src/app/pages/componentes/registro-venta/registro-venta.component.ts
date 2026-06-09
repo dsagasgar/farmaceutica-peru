@@ -1,14 +1,9 @@
-import { Component } from '@angular/core';
+import { Component, OnInit, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-
-interface ItemOrden {
-  id: string;
-  nombre: string;
-  cantidad: number;
-  precio: number;
-  subtotal: number;
-}
+import { VentaService } from '../../../services/venta.service';
+import { AuthService } from '../../../services/auth.service';
+import { Venta, Usuario } from '../../../models/types';
 
 @Component({
   selector: 'app-register-venta',
@@ -17,81 +12,70 @@ interface ItemOrden {
   templateUrl: './registro-venta.component.html',
   styleUrl: './registro-venta.component.css'
 })
-export class RegisterVentaComponent {
-  ticketNumber = Math.random().toString().substring(7, 12).toUpperCase();
-  currentDate = new Date().toLocaleDateString();
+export class RegisterVentaComponent implements OnInit {
+  private ventaService = inject(VentaService);
+  private authService = inject(AuthService);
 
-  cliente = {
-    nombre: '',
-    cedula: '',
-    telefono: ''
-  };
+  // State managers for order retrieval and checkout flow
+  buscarTicketId = '';
+  ordenActual: Venta | null = null;
+  usuarioCajero: Usuario | null = null;
+  
+  procesandoPago = false;
+  mensajeError = '';
+  mensajeExito = '';
 
-  productos = [
-    { id: '1', nombre: 'Paracetamol 500mg', precio: 2.50 },
-    { id: '2', nombre: 'Amoxicilina 500mg', precio: 8.50 },
-    { id: '3', nombre: 'Vitamin C 1000mg', precio: 4.20 },
-    { id: '4', nombre: 'Ibuprofeno 400mg', precio: 3.75 }
-  ];
-
-  items: ItemOrden[] = [];
-  busquedaProducto = '';
-  selectedProducto = '';
-  cantidadProducto = 1;
-  notas = '';
-  impuestoPorcentaje = 15;
-
-  get cantidadTotal(): number {
-    return this.items.reduce((sum, item) => sum + item.cantidad, 0);
+  ngOnInit(): void {
+    // Captura las credenciales del cajero que inició sesión en el frontend
+    this.usuarioCajero = this.authService.obtenerUsuarioActual();
   }
 
-  get subtotal(): number {
-    return this.items.reduce((sum, item) => sum + item.subtotal, 0);
+  // Looks up the pre-generated order token from the database
+  buscarOrden(): void {
+    if (!this.buscarTicketId.trim()) return;
+
+    this.mensajeError = '';
+    this.mensajeExito = '';
+    this.ordenActual = null;
+
+    this.ventaService.buscarOrdenPorId(this.buscarTicketId.trim()).subscribe({
+      next: (venta: Venta) => {
+        if (venta.estado !== 'PENDIENTE_PAGO') {
+          this.mensajeError = `El ticket #${venta.id} ya se encuentra en estado: ${venta.estado}`;
+          return;
+        }
+        this.ordenActual = venta;
+      },
+      error: (err) => {
+        this.mensajeError = 'No se encontró ninguna orden pendiente con el ID proporcionado.';
+        console.error('Ticket search failed:', err);
+      }
+    });
   }
 
-  get impuesto(): number {
-    return this.subtotal * (this.impuestoPorcentaje / 100);
-  }
+  // Commits the payment transaction to Spring Boot and updates state in PostgreSQL
+  emitirTicket(): void {
+    if (!this.ordenActual || !this.usuarioCajero) return;
 
-  get total(): number {
-    return this.subtotal + this.impuesto;
-  }
+    this.procesandoPago = true;
+    this.mensajeError = '';
 
-  agregarProducto(): void {
-    if (!this.selectedProducto || this.cantidadProducto <= 0) return;
-
-    const producto = this.productos.find(p => p.id === this.selectedProducto);
-    if (!producto) return;
-
-    const item: ItemOrden = {
-      id: producto.id,
-      nombre: producto.nombre,
-      cantidad: this.cantidadProducto,
-      precio: producto.precio,
-      subtotal: producto.precio * this.cantidadProducto
-    };
-
-    this.items.push(item);
-    this.selectedProducto = '';
-    this.cantidadProducto = 1;
-  }
-
-  eliminarItem(index: number): void {
-    this.items.splice(index, 1);
+    this.ventaService.registrarPago(this.ordenActual.id, this.usuarioCajero.id).subscribe({
+      next: (ventaPagada: Venta) => {
+        this.procesandoPago = false;
+        this.mensajeExito = `¡Cobro procesado con éxito! Ticket #${ventaPagada.id} marcado como PAGADO.`;
+        this.limpiarFormulario();
+      },
+      error: (err) => {
+        this.procesandoPago = false;
+        this.mensajeError = 'Hubo un problema al registrar el pago en el servidor. Inténtelo nuevamente.';
+        console.error('Payment processing rollback trigger:', err);
+      }
+    });
   }
 
   limpiarFormulario(): void {
-    this.cliente = { nombre: '', cedula: '', telefono: '' };
-    this.items = [];
-    this.notas = '';
-    this.selectedProducto = '';
-    this.cantidadProducto = 1;
-  }
-
-  emitirTicket(): void {
-    if (this.items.length === 0) return;
-
-    alert(`Ticket #${this.ticketNumber} emitido para ${this.cliente.nombre}\nTotal: $${this.total.toFixed(2)}`);
-    this.limpiarFormulario();
+    this.buscarTicketId = '';
+    this.ordenActual = null;
   }
 }

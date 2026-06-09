@@ -4,7 +4,6 @@ import { Router } from '@angular/router';
 import { BehaviorSubject, Observable, tap } from 'rxjs';
 import { environment } from '../../environments/environment';
 
-// Definimos las interfaces aquí para que el servicio sea autocontenido.
 export interface Usuario {
   id: string;
   email: string;
@@ -23,7 +22,8 @@ interface AuthResponse {
 export class AuthService {
   private http = inject(HttpClient);
   private router = inject(Router);
-  private apiUrl = `${environment.apiUrl}/auth`;
+  
+  private apiUrl = `${environment.apiUrl}/api/auth`;
 
   private usuarioActualSubject = new BehaviorSubject<Usuario | null>(null);
   public usuarioActual$ = this.usuarioActualSubject.asObservable();
@@ -51,7 +51,6 @@ export class AuthService {
     return this.usuarioActualSubject.getValue();
   }
 
-  // ESTE ES EL MÉTODO QUE SOLUCIONA EL ERROR
   getToken(): string | null {
     return localStorage.getItem('token');
   }

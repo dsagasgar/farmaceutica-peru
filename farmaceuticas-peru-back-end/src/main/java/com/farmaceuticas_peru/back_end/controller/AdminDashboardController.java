@@ -22,13 +22,15 @@ public class AdminDashboardController {
     private final AdminDashboardService adminDashboardService;
 
     @GetMapping("/stats")
-    @PreAuthorize("hasAuthority('ROLE_ADMINISTRADOR')")
+    // CORREGIDO: Cambiado a hasRole para que calce con el prefijo "ROLE_" del filtro JWT
+    @PreAuthorize("hasRole('ADMINISTRADOR')")
     public ResponseEntity<AdminStats> getStats() {
         return ResponseEntity.ok(adminDashboardService.getStats());
     }
 
     @GetMapping("/activity")
-    @PreAuthorize("hasAuthority('ROLE_ADMINISTRADOR')")
+    // CORREGIDO: Cambiado a hasRole para unificar el control de acceso del dashboard gerencial
+    @PreAuthorize("hasRole('ADMINISTRADOR')")
     public ResponseEntity<List<ActividadReciente>> getActividadReciente() {
         return ResponseEntity.ok(adminDashboardService.getActividadReciente());
     }

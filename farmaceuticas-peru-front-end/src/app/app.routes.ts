@@ -15,25 +15,26 @@ export const routes: Routes = [
     path: 'dashboard/administrador',
     component: AdminDashboardComponent,
     canActivate: [authGuard],
-    data: { role: 'ADMINISTRADOR' }
+    // CORREGIDO: Migración a arreglo estructurado de accesos (multi-role arrays)
+    data: { roles: ['ADMINISTRADOR'] }
   },
   {
     path: 'dashboard/quimico',
     component: QuimicoDashboardComponent,
     canActivate: [authGuard],
-    data: { role: 'QUIMICO_FARMACEUTICO' }
+    data: { roles: ['QUIMICO_FARMACEUTICO', 'ADMINISTRADOR'] } // Permite auditoría de fórmulas
   },
   {
     path: 'dashboard/cajero',
     component: CajeroDashboardComponent,
     canActivate: [authGuard],
-    data: { role: 'CAJERO' }
+    data: { roles: ['CAJERO', 'ADMINISTRADOR'] } // CORREGIDO: El administrador puede ingresar a supervisar cajas
   },
   {
     path: 'dashboard/almacen',
     component: AlmacenDashboardComponent,
     canActivate: [authGuard],
-    data: { role: 'ALMACENERO' }
+    data: { roles: ['ALMACENERO', 'ADMINISTRADOR'] } // CORREGIDO: El administrador puede ingresar a ver stock e inventario
   },
   {
     path: '',

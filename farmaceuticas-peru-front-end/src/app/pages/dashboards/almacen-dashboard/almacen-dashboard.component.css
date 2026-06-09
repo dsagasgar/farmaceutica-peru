@@ -1,46 +1,245 @@
-:host { display: block; background-color: #f0f2f5; min-height: 100dvh; }
-.dashboard-container { display: flex; flex-direction: column; }
-.dashboard-header { background: white; padding: 1rem 2rem; border-bottom: 1px solid #dee2e6; box-shadow: 0 2px 4px rgba(0,0,0,0.05); }
-.header-content { display: flex; justify-content: space-between; align-items: center; max-width: 1400px; margin: 0 auto; }
-h1 { margin: 0; font-size: 1.5rem; color: #343a40; font-weight: 600; }
-.user-info { display: flex; align-items: center; gap: 1rem; }
-.user-name { font-weight: 600; color: #495057; }
-.user-role { background: #e9ecef; color: #495057; padding: 0.25rem 0.75rem; border-radius: 1rem; font-size: 0.8rem; font-weight: 500; }
-.logout-btn { background: #dc3545; color: white; border: none; padding: 0.5rem 1rem; border-radius: 6px; cursor: pointer; font-weight: 500; transition: background-color 0.2s; }
-.logout-btn:hover { background: #c82333; }
-.dashboard-main { padding: 2rem; max-width: 1400px; margin: 0 auto; width: 100%; }
-.dashboard-section { background: white; border: 1px solid #dee2e6; border-radius: 8px; padding: 1.5rem; margin-bottom: 2rem; box-shadow: 0 2px 4px rgba(0,0,0,0.02); }
-.section-title { font-size: 1.25rem; color: #343a40; margin: 0 0 0.5rem 0; font-weight: 600; }
-.section-description { font-size: 0.95rem; color: #6c757d; margin-bottom: 1.5rem; }
-.placeholder { text-align: center; padding: 2rem; border: 2px dashed #e9ecef; border-radius: 6px; color: #6c757d; }
-.action-btn:disabled { background-color: #6c757d; cursor: not-allowed; }
-.animate-fade-in { animation: fadeIn 0.5s ease-in-out; }
-@keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
-.compras-list { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 1rem; }
-.compra-card { background: #f8f9fa; border: 1px solid #dee2e6; border-radius: 6px; display: flex; flex-direction: column; }
-.compra-card-header { padding: 1rem; border-bottom: 1px solid #dee2e6; }
-.compra-card-header h3 { margin: 0; font-size: 1.1rem; }
-.compra-card-header span { font-size: 0.9rem; color: #6c757d; }
-.compra-card-body { padding: 1rem; flex-grow: 1; }
-.compra-card-body p { margin: 0 0 0.5rem 0; }
-.compra-card-footer { padding: 1rem; border-top: 1px solid #dee2e6; }
-.compra-card-footer button { background-color: #0056b3; color: white; border: none; padding: 0.6rem 1rem; border-radius: 6px; cursor: pointer; width: 100%; }
-.back-btn { background: none; border: none; color: #0056b3; cursor: pointer; font-size: 1rem; margin-bottom: 1rem; }
-.table-wrapper { overflow-x: auto; }
-.items-table { width: 100%; border-collapse: collapse; margin-bottom: 1.5rem; }
-.items-table th, .items-table td { padding: 0.75rem; border: 1px solid #dee2e6; text-align: center; }
-.items-table thead th { background-color: #e9ecef; font-weight: 600; }
-.items-table td:first-child { text-align: left; }
-.text-center { text-align: center; }
-.items-table input { width: 80px; padding: 0.5rem; text-align: center; border: 1px solid #ced4da; border-radius: 4px; }
-.observaciones-section { margin-bottom: 1.5rem; }
-.observaciones-section label { display: block; margin-bottom: 0.5rem; font-weight: 600; }
-.observaciones-section textarea { width: 100%; padding: 0.75rem; border: 1px solid #ced4da; border-radius: 6px; font-family: inherit; }
-.submit-btn { background-color: #28a745; color: white; border: none; padding: 0.8rem 1.5rem; font-size: 1rem; font-weight: 600; border-radius: 6px; cursor: pointer; }
-.submit-btn:disabled { background-color: #6c757d; }
-.error-msg { color: #721c24; margin-bottom: 1rem; }
-.stock-input { width: 100px; }
+:host { 
+  display: block; 
+  background-color: #f0f2f5; 
+  min-height: 100dvh; 
+}
+.dashboard-container { 
+  display: flex; 
+  flex-direction: column; 
+}
+.dashboard-header { 
+  background: white; 
+  padding: 1rem 2rem; 
+  border-bottom: 1px solid #dee2e6; 
+  box-shadow: 0 2px 4px rgba(0,0,0,0.05); 
+}
+.header-content { 
+  display: flex; 
+  justify-content: space-between; 
+  align-items: center; 
+  max-width: 1400px; 
+  margin: 0 auto; 
+}
+h1 { 
+  margin: 0; 
+  font-size: 1.5rem; 
+  color: #343a40; 
+  font-weight: 600; 
+}
+.user-info { 
+  display: flex; 
+  align-items: center; 
+  gap: 1rem; 
+}
+.user-name { 
+  font-weight: 600; 
+  color: #495057; 
+}
+.user-role { 
+  background: #e9ecef; 
+  color: #495057; 
+  padding: 0.25rem 0.75rem; 
+  border-radius: 1rem; 
+  font-size: 0.8rem; 
+  font-weight: 500; 
+}
+.logout-btn { 
+  background: #dc3545; 
+  color: white; 
+  border: none; 
+  padding: 0.5rem 1rem; 
+  border-radius: 6px; 
+  cursor: pointer; 
+  font-weight: 500; 
+  transition: background-color 0.2s; 
+}
+.logout-btn:hover { 
+  background: #c82333; 
+}
+.dashboard-main { 
+  padding: 2rem; 
+  max-width: 1400px; 
+  margin: 0 auto; 
+  width: 100%; 
+}
+.dashboard-section { 
+  background: white; 
+  border: 1px solid #dee2e6; 
+  border-radius: 8px; 
+  padding: 1.5rem; 
+  margin-bottom: 2rem; 
+  box-shadow: 0 2px 4px rgba(0,0,0,0.02); 
+}
+.section-title { 
+  font-size: 1.25rem; 
+  color: #343a40; 
+  margin: 0 0 0.5rem 0; 
+  font-weight: 600; 
+}
+.section-description { 
+  font-size: 0.95rem; 
+  color: #6c757d; 
+  margin-bottom: 1.5rem; 
+}
+.placeholder { 
+  text-align: center; 
+  padding: 2rem; 
+  border: 2px dashed #e9ecef; 
+  border-radius: 6px; 
+  color: #6c757d; 
+}
+.animate-fade-in { 
+  animation: fadeIn 0.5s ease-in-out; 
+}
+@keyframes fadeIn { 
+  from { opacity: 0; } 
+  to { opacity: 1; } 
+}
+.compras-list { 
+  display: grid; 
+  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); 
+  gap: 1rem; 
+}
+.compra-card { 
+  background: #f8f9fa; 
+  border: 1px solid #dee2e6; 
+  border-radius: 6px; 
+  display: flex; 
+  flex-direction: column; 
+}
+.compra-card-header { 
+  padding: 1rem; 
+  border-bottom: 1px solid #dee2e6; 
+}
+.compra-card-header h3 { 
+  margin: 0; 
+  font-size: 1.1rem; 
+}
+.compra-card-header span { 
+  font-size: 0.9rem; 
+  color: #6c757d; 
+}
+.compra-card-body { 
+  padding: 1rem; 
+  flex-grow: 1; 
+}
+.compra-card-body p { 
+  margin: 0 0 0.5rem 0; 
+}
+.compra-card-footer { 
+  padding: 1rem; 
+  border-top: 1px solid #dee2e6; 
+}
+.compra-card-footer button { 
+  background-color: #0056b3; 
+  color: white; 
+  border: none; 
+  padding: 0.6rem 1rem; 
+  border-radius: 6px; 
+  cursor: pointer; 
+  width: 100%; 
+}
+.back-btn { 
+  background: none; 
+  border: none; 
+  color: #0056b3; 
+  cursor: pointer; 
+  font-size: 1rem; 
+  margin-bottom: 1rem; 
+}
+.table-wrapper { 
+  overflow-x: auto; 
+}
+.items-table { 
+  width: 100%; 
+  border-collapse: collapse; 
+  margin-bottom: 1.5rem; 
+}
+.items-table th, .items-table td { 
+  padding: 0.75rem; 
+  border: 1px solid #dee2e6; 
+  text-align: center; 
+}
+.items-table thead th { 
+  background-color: #e9ecef; 
+  font-weight: 600; 
+}
+.items-table td:first-child { 
+  text-align: left; 
+}
+.text-center { 
+  text-align: center; 
+}
+.items-table input { 
+  width: 80px; 
+  padding: 0.5rem; 
+  text-align: center; 
+  border: 1px solid #ced4da; 
+  border-radius: 4px; 
+}
+.observaciones-section { 
+  margin-bottom: 1.5rem; 
+}
+.observaciones-section label { 
+  display: block; 
+  margin-bottom: 0.5rem; 
+  font-weight: 600; 
+}
+.observaciones-section textarea { 
+  width: 100%; 
+  padding: 0.75rem; 
+  border: 1px solid #ced4da; 
+  border-radius: 6px; 
+  font-family: inherit; 
+}
+.submit-btn { 
+  background-color: #28a745; 
+  color: white; 
+  border: none; 
+  padding: 0.8rem 1.5rem; 
+  font-size: 1rem; 
+  font-weight: 600; 
+  border-radius: 6px; 
+  cursor: pointer; 
+}
+.submit-btn:disabled, .action-btn-small:disabled { 
+  background-color: #6c757d; 
+  cursor: not-allowed; 
+}
+.stock-input { 
+  width: 100px; 
+}
 .action-btn-small {
-  background-color: #17a2b8; color: white; border: none;
-  padding: 0.4rem 0.8rem; border-radius: 4px; cursor: pointer;
+  background-color: #17a2b8; 
+  color: white; 
+  border: none;
+  padding: 0.4rem 0.8rem; 
+  border-radius: 4px; 
+  cursor: pointer;
+  transition: opacity 0.2s ease;
+}
+.action-btn-small:hover:not(:disabled) {
+  opacity: 0.9;
+}
+
+/* ==========================================================================
+   NEW: Global Feedback Alert Styles (Cohesive Notification Layout)
+   ========================================================================== */
+.alert {
+  padding: 0.75rem 1.25rem;
+  margin-bottom: 1.5rem;
+  border-radius: 6px;
+  text-align: center;
+  font-weight: 500;
+  font-size: 0.95rem;
+}
+.alert-error {
+  background-color: #f8d7da;
+  border: 1px solid #f5c6cb;
+  color: #721c24;
+}
+.alert-exito {
+  background-color: #d4edda;
+  border: 1px solid #c3e6cb;
+  color: #155724;
 }
