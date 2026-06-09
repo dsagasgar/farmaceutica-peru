@@ -11,6 +11,7 @@ farmaceuticas-peru-back-end/.mvn/wrapper/maven-wrapper.jar
 .target/
 .DS_Store
 .vscode/repo-backup.git/
+.vscode
 
 # --- Database Local Storage (ADDED) ---
 # CORREGIDO: Bloqueamos los binarios locales. No se suben a GitHub.
