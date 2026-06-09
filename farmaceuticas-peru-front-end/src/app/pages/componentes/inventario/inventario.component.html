@@ -6,17 +6,17 @@
 
   <div class="controles">
     <div class="search-group">
-      <input type="text" [(ngModel)]="busqueda" placeholder="Buscar producto..."/>
+      <!-- Escucha activa mediante el evento onBusqueda() al escribir -->
+      <input type="text" [(ngModel)]="busqueda" (input)="onBusqueda()" placeholder="Buscar producto por nombre o marca..."/>
     </div>
     <div class="filter-group">
-      <select [(ngModel)]="filtroEstado">
+      <select [(ngModel)]="filtroEstado" (change)="onBusqueda()">
         <option value="">Todos los estados</option>
         <option value="disponible">Disponible</option>
         <option value="bajo-stock">Bajo Stock</option>
         <option value="agotado">Agotado</option>
-        <option value="vencido">Vencido</option>
       </select>
-      <select [(ngModel)]="filtroCategoria">
+      <select [(ngModel)]="filtroCategoria" (change)="onBusqueda()">
         <option value="">Todas las categorías</option>
         <option value="Antibioticos">Antibióticos</option>
         <option value="Anti-inflamatorio">Anti-inflamatorio</option>
@@ -24,18 +24,20 @@
         <option value="Analgesicos">Analgésicos</option>
       </select>
     </div>
+    
+    <!-- CONTADORES: Corregidos con tuberías asíncronas para resolver los errores ngtsc -->
     <div class="stats">
       <div class="stat">
-        <span class="label">Total Productos:</span>
-        <span class="valor">{{ productosFiltrrados.length }}</span>
+        <span class="label">Total Ítems:</span>
+        <span class="valor">{{ totalProductos$ | async }}</span>
       </div>
       <div class="stat">
-        <span class="label">Valor Inventario:</span>
-        <span class="valor">{{ valorTotal.toFixed(2) }}</span>
+        <span class="label">Valor Activo:</span>
+        <span class="valor">{{ (valorInventario$ | async) | currency:'S/ ' }}</span>
       </div>
       <div class="stat alert">
         <span class="label">Bajo Stock:</span>
-        <span class="valor">{{ productosBajoStock }}</span>
+        <span class="valor">{{ bajoStock$ | async }}</span>
       </div>
     </div>
   </div>
@@ -47,8 +49,8 @@
           <th>Producto</th>
           <th>Marca</th>
           <th>Categoría</th>
-          <th>Stock</th>
-          <th>Mínimo</th>
+          <th>Stock Físico</th>
+          <th>Cuota Venta</th>
           <th>Precio</th>
           <th>Vencimiento</th>
           <th>Lote</th>
@@ -57,90 +59,81 @@
         </tr>
       </thead>
       <tbody>
-        <tr *ngFor="let producto of productosFiltrrados" [ngClass]="'estado-' + producto.estado">
-          <td class="nombre">{{ producto.nombre }}</td>
+        <!-- Iteración asíncrona sobre el flujo filtrado -->
+        <tr *ngFor="let producto of (productosFiltrados$ | async)" [ngClass]="'estado-' + calcularEstado(producto)">
+          <td class="nombre">{{ producto.nombre }} <small>({{ producto.codigo }})</small></td>
           <td>{{ producto.marca }}</td>
           <td>{{ producto.categoria }}</td>
-          <td class="cantidad">{{ producto.cantidad }}</td>
-          <td>{{ producto.alertaMinima }}</td>
-          <td class="precio">{{ producto.precio.toFixed(2) }}</td>
+          <td class="cantidad">{{ producto.stock }}</td>
+          <!-- Campo interactivo para delimitar stockVenta en mostrador -->
+          <td><strong>{{ producto.stockVenta }}</strong></td>
+          <td class="precio">{{ producto.precioUnitario | currency:'S/ ' }}</td>
           <td>{{ producto.fechaVencimiento | date:'dd/MM/yyyy' }}</td>
           <td>{{ producto.lote }}</td>
           <td>
-            <span [ngClass]="'badge-' + producto.estado">
-              {{ producto.estado | uppercase }}
+            <span [ngClass]="'badge-' + calcularEstado(producto)">
+              {{ calcularEstado(producto) | uppercase }}
             </span>
           </td>
           <td class="acciones-cell">
-            <button (click)="editarProducto(producto)" class="btn-editar">Editar</button>
-            <button (click)="eliminarProducto(producto.id)" class="btn-eliminar">Eliminar</button>
+            <button (click)="editarProducto(producto)" class="btn-editar">Asignar Cuota</button>
           </td>
         </tr>
       </tbody>
     </table>
 
-    <div *ngIf="productosFiltrrados.length === 0" class="sin-resultados">
-      <p>No hay productos que coincidan con los criterios de búsqueda</p>
+    <div *ngIf="(productosFiltrados$ | async)?.length === 0" class="sin-resultados">
+      <p>No hay productos que coincidan con los criterios de búsqueda en PostgreSQL.</p>
     </div>
   </div>
 
   <!-- Modal para agregar/editar producto -->
   <div *ngIf="mostrarModal" class="modal-overlay" (click)="cerrarModal()">
     <div class="modal-contenido" (click)="$event.stopPropagation()">
-      <h2>{{ editando ? 'Editar' : 'Agregar' }} Producto</h2>
+      <h2>{{ editando ? 'Modificar Cuota de Venta' : 'Visualizar Registro' }}</h2>
       
       <div class="form-group">
         <label>Nombre del Producto</label>
-        <input type="text" [(ngModel)]="productoForm.nombre" placeholder="Nombre del producto"/>
-      </div>
-
-      <div class="form-group">
-        <label>Marca</label>
-        <input type="text" [(ngModel)]="productoForm.marca" placeholder="Marca"/>
+        <input type="text" [(ngModel)]="productoForm.nombre" readonly disabled/>
       </div>
 
       <div class="form-row">
         <div class="form-group">
           <label>Categoría</label>
-          <select [(ngModel)]="productoForm.categoria">
-            <option value="">Seleccionar categoría</option>
-            <option value="Antibioticos">Antibióticos</option>
-            <option value="Anti-inflamatorio">Anti-inflamatorio</option>
-            <option value="Vitaminas">Vitaminas</option>
-            <option value="Analgesicos">Analgésicos</option>
-          </select>
+          <input type="text" [(ngModel)]="productoForm.categoria" readonly disabled/>
         </div>
         <div class="form-group">
-          <label>Cantidad</label>
-          <input type="number" [(ngModel)]="productoForm.cantidad" min="0"/>
+          <label>Stock Físico Real en Almacén</label>
+          <input type="number" [(ngModel)]="productoForm.stock" readonly disabled/>
         </div>
       </div>
 
       <div class="form-row">
         <div class="form-group">
-          <label>Alerta Mínima</label>
-          <input type="number" [(ngModel)]="productoForm.alertaMinima" min="0"/>
+          <label>Precio Unitario (S/)</label>
+          <input type="number" [(ngModel)]="productoForm.precioUnitario" readonly disabled/>
         </div>
         <div class="form-group">
-          <label>Precio</label>
-          <input type="number" [(ngModel)]="productoForm.precio" min="0" step="0.01"/>
+          <!-- Único campo editable por el Almacenero para la HU de asignación -->
+          <label style="color: #0056b3;">Stock para Venta al Público</label>
+          <input type="number" [(ngModel)]="productoForm.stockVenta" min="0" [max]="productoForm.stock"/>
         </div>
       </div>
 
       <div class="form-row">
         <div class="form-group">
           <label>Fecha de Vencimiento</label>
-          <input type="date" [(ngModel)]="productoForm.fechaVencimiento"/>
+          <input type="date" [(ngModel)]="productoForm.fechaVencimiento" readonly disabled/>
         </div>
         <div class="form-group">
           <label>Lote</label>
-          <input type="text" [(ngModel)]="productoForm.lote" placeholder="Número de lote"/>
+          <input type="text" [(ngModel)]="productoForm.lote" readonly disabled/>
         </div>
       </div>
 
       <div class="modal-acciones">
         <button (click)="cerrarModal()" class="btn-cancelar">Cancelar</button>
-        <button (click)="guardarProducto()" class="btn-guardar">Guardar</button>
+        <button (click)="guardarProducto()" class="btn-guardar">Actualizar en Base de Datos</button>
       </div>
     </div>
   </div>

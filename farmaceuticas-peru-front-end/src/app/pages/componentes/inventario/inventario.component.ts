@@ -4,7 +4,7 @@ import { FormsModule } from '@angular/forms';
 import { ProductoService } from '../../../services/producto.service';
 import { Producto } from '../../../models/types';
 import { Subject, Observable } from 'rxjs';
-import { debounceTime, distinctUntilChanged, switchMap, startWith, map } from 'rxjs/operators';
+import { debounceTime, distinctUntilChanged, switchMap, startWith, map, shareReplay } from 'rxjs/operators';
 
 @Component({
   selector: 'app-inventario',
@@ -30,13 +30,30 @@ export class InventarioComponent implements OnInit {
   editando = false;
   productoForm: Producto = this.inicializarFormulario();
 
+  // NUEVO: Observables para los contadores estadísticos de la cabecera
+  totalProductos$!: Observable<number>;
+  valorInventario$!: Observable<number>;
+  bajoStock$!: Observable<number>;
+
   ngOnInit(): void {
-    // Orquestación del flujo de datos con el pipeline asíncrono de Spring Boot
+    // Pipeline asíncrono optimizado con shareReplay para que los contadores no disparen peticiones HTTP extra
     this.productos$ = this.busquedaSubject.pipe(
       startWith(''),
       debounceTime(300),
       distinctUntilChanged(),
-      switchMap((term: string) => this.productoService.buscarProductosParaAlmacen(term))
+      switchMap((term: string) => this.productoService.buscarProductosParaAlmacen(term)),
+      shareReplay(1) 
+    );
+
+    // Inicialización de la telemetría estadística del almacén
+    this.totalProductos$ = this.productosFiltrados$.pipe(map(list => list.length));
+    
+    this.valorInventario$ = this.productosFiltrados$.pipe(
+      map(list => list.reduce((sum, p) => sum + (p.stock * p.precioUnitario), 0))
+    );
+    
+    this.bajoStock$ = this.productosFiltrados$.pipe(
+      map(list => list.filter(p => this.calcularEstado(p) === 'bajo-stock' || this.calcularEstado(p) === 'agotado').length)
     );
   }
 
@@ -48,10 +65,11 @@ export class InventarioComponent implements OnInit {
   get productosFiltrados$(): Observable<Producto[]> {
     return this.productos$.pipe(
       map(productos => productos.filter(p => {
-        // Adaptado a las propiedades reales del modelo: nombre, marca, stock
+        const coincideBusqueda = p.nombre.toLowerCase().includes(this.busqueda.toLowerCase()) ||
+                                 p.marca.toLowerCase().includes(this.busqueda.toLowerCase());
         const coincideEstado = !this.filtroEstado || this.calcularEstado(p) === this.filtroEstado;
         const coincideCategoria = !this.filtroCategoria || p.categoria === this.filtroCategoria;
-        return coincideEstado && coincideCategoria;
+        return coincideBusqueda && coincideEstado && coincideCategoria;
       }))
     );
   }
@@ -74,11 +92,10 @@ export class InventarioComponent implements OnInit {
 
   guardarProducto(): void {
     if (this.editando && this.productoForm.id) {
-      // Llama a tu endpoint real de actualización mapeando el stock de venta asignado
       this.productoService.actualizarStockVenta(this.productoForm.id, this.productoForm.stockVenta).subscribe({
         next: (prodActualizado) => {
           console.log('Stock de venta actualizado en PostgreSQL:', prodActualizado);
-          this.busquedaSubject.next(this.busqueda); // Refresca la lista
+          this.busquedaSubject.next(this.busqueda); 
           this.cerrarModal();
         },
         error: (err) => console.error('Error al guardar en el backend:', err)
@@ -86,10 +103,9 @@ export class InventarioComponent implements OnInit {
     }
   }
 
-  // Helper necesario para calcular dinámicamente el estado visual en la vista del Almacenero
   calcularEstado(producto: Producto): string {
     if (!producto.stock || producto.stock === 0) return 'agotado';
-    if (producto.stock < 50) return 'bajo-stock'; // Umbral de alerta mínima
+    if (producto.stock < 50) return 'bajo-stock'; 
     return 'disponible';
   }
 
@@ -106,7 +122,7 @@ export class InventarioComponent implements OnInit {
       precioUnitario: 0,
       stock: 0,
       stockVenta: 0,
-      fechaVencimiento: new Date().toISOString().split('T')[0] // Formato YYYY-MM-DD para inputs de tipo date
+      fechaVencimiento: new Date().toISOString().split('T')[0]
     };
   }
 }
