@@ -14,15 +14,21 @@ import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
-import lombok.Data;
+import lombok.EqualsAndHashCode;
+import lombok.Getter;
 import lombok.NoArgsConstructor;
+import lombok.Setter;
+import lombok.ToString;
 
 @Entity
 @Table(name = "formulas_magistrales")
-@Data
+@Getter
+@Setter
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
+@ToString(exclude = "venta") // CORREGIDO: Evita evaluar el string extendido de la venta madre
+@EqualsAndHashCode(exclude = "venta") // CORREGIDO: Remueve la recursividad en contextos de persistencia (persistence contexts)
 public class FormulaMagistral {
 
     @Id
