@@ -19,7 +19,6 @@
       
       <div class="section-content">
         <div *ngIf="!compraSeleccionada; else detalleCompra" class="animate-fade-in">
-          <!-- CORREGIDO: Evaluación basada en arreglos nativos del componente -->
           <div *ngIf="!cargandoCompras; else loading">
             <div *ngIf="compras.length > 0; else noCompras" class="compras-list">
               <div *ngFor="let compra of compras" class="compra-card">
