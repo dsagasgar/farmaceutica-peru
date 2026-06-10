@@ -55,7 +55,6 @@ describe('AlmacenDashboardComponent', () => {
       stock: 100,
       stockVenta: 40,
       categoria: 'Gastro',
-      customName: 'Genfar',
       fechaVencimiento: '2028-12-31',
       lote: 'L100',
       formato: 'Pastilla',
@@ -63,7 +62,7 @@ describe('AlmacenDashboardComponent', () => {
     }
   ];
 
-  beforeEach(() => {
+  beforeEach(async () => {
     mockAuthService = {
       obtenerUsuarioActual: vi.fn().mockReturnValue(dummyUser),
       logout: vi.fn()
@@ -83,7 +82,7 @@ describe('AlmacenDashboardComponent', () => {
       navigate: vi.fn()
     };
 
-    TestBed.configureTestingModule({
+    await TestBed.configureTestingModule({
       imports: [AlmacenDashboardComponent],
       providers: [
         { provide: AuthService, useValue: mockAuthService },
@@ -132,7 +131,15 @@ describe('AlmacenDashboardComponent', () => {
 
       expect(mockCompraService.registrarRecepcion).toHaveBeenCalledWith(
         dummyCompras[0].id,
-        component.itemsVerificacion,
+        [
+          {
+            productoId: 'PROD-1',
+            nombreProducto: 'Paracetamol',
+            cantidadPedida: 100,
+            cantidadRecibida: 100,
+            costoUnitario: 1.5
+          }
+        ],
         'Todo OK'
       );
       expect(component.procesando).toBe(false);

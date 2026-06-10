@@ -93,7 +93,7 @@ export interface CompraProveedor {
   items: ItemCompra[];
   total: number;
   estado: string;
-  observacionesAlmacen?: string | null; // 👈 CORREGIDO: Alineado con la columna de Spring
+  observacionesAlmacen?: string | null; //  CORREGIDO: Alineado con la columna de Spring
 }
 
 export interface AdminStats {

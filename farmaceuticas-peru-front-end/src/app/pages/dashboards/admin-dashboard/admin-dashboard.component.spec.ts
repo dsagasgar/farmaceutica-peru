@@ -44,7 +44,7 @@ describe('AdminDashboardComponent', () => {
     }
   ];
 
-  beforeEach(() => {
+  beforeEach(async () => {
     mockAuthService = {
       obtenerUsuarioActual: vi.fn().mockReturnValue(dummyUser),
       logout: vi.fn()
@@ -67,7 +67,7 @@ describe('AdminDashboardComponent', () => {
       navigate: vi.fn()
     };
 
-    TestBed.configureTestingModule({
+    await TestBed.configureTestingModule({
       imports: [AdminDashboardComponent],
       providers: [
         { provide: AuthService, useValue: mockAuthService },

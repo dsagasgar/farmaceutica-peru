@@ -1,7 +1,6 @@
 import { TestBed, ComponentFixture } from '@angular/core/testing';
 import { Router } from '@angular/router';
 import { of, throwError } from 'rxjs';
-import { NgZone } from '@angular/core';
 import { describe, beforeEach, it, expect, vi } from 'vitest';
 
 import { CajeroDashboardComponent } from './cajero-dashboard.component';
@@ -9,11 +8,6 @@ import { AuthService } from '../../../services/auth.service';
 import { VentaService } from '../../../services/venta.service';
 import { Usuario, Venta } from '../../../models/types';
 
-class MockNgZone {
-  run(fn: Function): any {
-    return fn();
-  }
-}
 
 describe('CajeroDashboardComponent', () => {
   let component: CajeroDashboardComponent;
@@ -43,7 +37,7 @@ describe('CajeroDashboardComponent', () => {
     estado: 'PENDIENTE_PAGO'
   };
 
-  beforeEach(() => {
+  beforeEach(async () => {
     mockAuthService = {
       obtenerUsuarioActual: vi.fn().mockReturnValue(dummyUser),
       logout: vi.fn()
@@ -58,13 +52,19 @@ describe('CajeroDashboardComponent', () => {
       navigate: vi.fn()
     };
 
-    TestBed.configureTestingModule({
+    TestBed.overrideComponent(CajeroDashboardComponent, {
+      set: {
+        template: '',
+        styles: []
+      }
+    });
+
+    await TestBed.configureTestingModule({
       imports: [CajeroDashboardComponent],
       providers: [
         { provide: AuthService, useValue: mockAuthService },
         { provide: VentaService, useValue: mockVentaService },
-        { provide: Router, useValue: mockRouter },
-        { provide: NgZone, useClass: MockNgZone }
+        { provide: Router, useValue: mockRouter }
       ]
     }).compileComponents();
 

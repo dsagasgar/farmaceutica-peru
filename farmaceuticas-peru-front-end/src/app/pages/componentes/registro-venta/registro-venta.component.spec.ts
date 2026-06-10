@@ -34,7 +34,7 @@ describe('RegisterVentaComponent', () => {
     estado: 'PENDIENTE_PAGO'
   };
 
-  beforeEach(() => {
+  beforeEach(async () => {
     mockVentaService = {
       buscarOrdenPorId: vi.fn(),
       registrarPago: vi.fn()
@@ -44,7 +44,7 @@ describe('RegisterVentaComponent', () => {
       obtenerUsuarioActual: vi.fn().mockReturnValue(dummyUser)
     };
 
-    TestBed.configureTestingModule({
+    await TestBed.configureTestingModule({
       imports: [RegisterVentaComponent],
       providers: [
         { provide: VentaService, useValue: mockVentaService },

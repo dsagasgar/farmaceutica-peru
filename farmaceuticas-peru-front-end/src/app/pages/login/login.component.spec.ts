@@ -15,7 +15,7 @@ describe('LoginComponent', () => {
   let mockAuthService: any;
   let mockRouter: any;
 
-  beforeEach(() => {
+  beforeEach(async () => {
     mockAuthService = {
       login: vi.fn()
     };
@@ -24,7 +24,7 @@ describe('LoginComponent', () => {
       navigate: vi.fn()
     };
 
-    TestBed.configureTestingModule({
+    await TestBed.configureTestingModule({
       imports: [LoginComponent],
       providers: [
         { provide: AuthService, useValue: mockAuthService },

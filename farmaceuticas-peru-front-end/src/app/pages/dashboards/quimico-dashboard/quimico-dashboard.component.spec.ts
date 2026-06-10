@@ -33,7 +33,7 @@ describe('QuimicoDashboardComponent', () => {
     estado: 'PENDIENTE_PAGO'
   };
 
-  beforeEach(() => {
+  beforeEach(async () => {
     mockAuthService = {
       obtenerUsuarioActual: vi.fn().mockReturnValue(dummyUser),
       logout: vi.fn()
@@ -43,7 +43,7 @@ describe('QuimicoDashboardComponent', () => {
       navigate: vi.fn()
     };
 
-    TestBed.configureTestingModule({
+    await TestBed.configureTestingModule({
       imports: [QuimicoDashboardComponent],
       providers: [
         { provide: AuthService, useValue: mockAuthService },
