@@ -12,17 +12,8 @@
 
   <main class="dashboard-main">
     
-    <section class="dashboard-section" *ngIf="!mostrandoFormularioPedido">
-      <h2 class="section-title">Consulta de Productos</h2>
-      <p class="section-description">
-        Busque productos en el inventario para ver detalles, stock y precios en tiempo real.
-      </p>
-      <div class="section-content">
-        <app-catalogo-productos></app-catalogo-productos>
-      </div>
-    </section>
-
-    <section class="dashboard-section">
+    <!-- SEGUNDO MOMENTO: Nuevo Pedido -->
+    <section class="dashboard-section orders-section">
       <h2 class="section-title">Nuevo Pedido / Fórmula Magistral</h2>
       <p class="section-description">
         Tome nota de los requerimientos del cliente para generar un ticket de cobro en mostrador.
@@ -46,5 +37,17 @@
         </app-nuevo-pedido>
       </div>
     </section>
+
+    <!-- PRIMER MOMENTO: Catálogo (HTML Puro) -->
+    <section class="dashboard-section catalog-section" *ngIf="!mostrandoFormularioPedido">
+      <h2 class="section-title">Consulta de Productos</h2>
+      <p class="section-description">
+        Busque productos en el inventario para ver detalles, stock y precios en tiempo real.
+      </p>
+      <div class="section-content">
+        <app-catalogo-productos></app-catalogo-productos>
+      </div>
+    </section>
+
   </main>
 </div>
