@@ -18,7 +18,6 @@ export class QuimicoDashboardComponent {
   private authService = inject(AuthService);
   private router = inject(Router);
 
-  // OPTIMIZED: Direct field initialization to remove the redundant constructor block
   usuario: Usuario | null = this.authService.obtenerUsuarioActual();
   mostrandoFormularioPedido = false;
   ordenGenerada: Venta | null = null;

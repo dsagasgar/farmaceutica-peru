@@ -16,27 +16,22 @@ import { debounceTime, distinctUntilChanged, switchMap, startWith, map, shareRep
 export class InventarioComponent implements OnInit {
   private productoService = inject(ProductoService);
 
-  // Control de estado reactivo para las consultas al backend
   productos$!: Observable<Producto[]>;
   private busquedaSubject = new Subject<string>();
   
-  // Modelos para los filtros de la interfaz
   busqueda = '';
   filtroEstado = '';
   filtroCategoria = '';
   
-  // Variables de control del Modal de Almacén
   mostrarModal = false;
   editando = false;
   productoForm: Producto = this.inicializarFormulario();
 
-  // NUEVO: Observables para los contadores estadísticos de la cabecera
   totalProductos$!: Observable<number>;
   valorInventario$!: Observable<number>;
   bajoStock$!: Observable<number>;
 
   ngOnInit(): void {
-    // Pipeline asíncrono optimizado con shareReplay para que los contadores no disparen peticiones HTTP extra
     this.productos$ = this.busquedaSubject.pipe(
       startWith(''),
       debounceTime(300),
@@ -45,7 +40,6 @@ export class InventarioComponent implements OnInit {
       shareReplay(1) 
     );
 
-    // Inicialización de la telemetría estadística del almacén
     this.totalProductos$ = this.productosFiltrados$.pipe(map(list => list.length));
     
     this.valorInventario$ = this.productosFiltrados$.pipe(
@@ -61,7 +55,6 @@ export class InventarioComponent implements OnInit {
     this.busquedaSubject.next(this.busqueda);
   }
 
-  // Getters optimizados que operan sobre los datos reales devueltos por el backend
   get productosFiltrados$(): Observable<Producto[]> {
     return this.productos$.pipe(
       map(productos => productos.filter(p => {

@@ -1,6 +1,6 @@
-import { TestBed, ComponentFixture, fakeAsync, tick } from '@angular/core/testing';
+import { TestBed, ComponentFixture } from '@angular/core/testing';
 import { of } from 'rxjs';
-import { describe, beforeEach, it, expect, vi } from 'vitest';
+import { describe, beforeEach, afterEach, it, expect, vi } from 'vitest';
 
 import { CatalogoProductosComponent } from './catalogo-productos.component';
 import { ProductoService } from '../../../services/producto.service';
@@ -9,9 +9,7 @@ import { Producto } from '../../../models/types';
 describe('CatalogoProductosComponent', () => {
   let component: CatalogoProductosComponent;
   let fixture: ComponentFixture<CatalogoProductosComponent>;
-
-  // Mocks
-  let mockProductoService: any;
+  let mockProductoService: { buscarProductosParaVenta: any };
 
   const dummyProductos: Producto[] = [
     {
@@ -31,6 +29,8 @@ describe('CatalogoProductosComponent', () => {
   ];
 
   beforeEach(() => {
+    vi.useFakeTimers();
+
     mockProductoService = {
       buscarProductosParaVenta: vi.fn().mockReturnValue(of(dummyProductos))
     };
@@ -46,38 +46,39 @@ describe('CatalogoProductosComponent', () => {
     component = fixture.componentInstance;
   });
 
-  it('should initialize and load default products on init', fakeAsync(() => {
-    fixture.detectChanges(); // Ejecuta ngOnInit
-    tick(300); // Para saltar el debounceTime(300)
+  afterEach(() => {
+    vi.useRealTimers();
+  });
+
+  it('should initialize and load default products on init', async () => {
+    fixture.detectChanges(); 
 
     let loadedProducts: Producto[] = [];
     component.productos$.subscribe(products => {
       loadedProducts = products;
     });
 
-    tick();
+    await vi.advanceTimersByTimeAsync(300); 
 
     expect(component).toBeTruthy();
     expect(mockProductoService.buscarProductosParaVenta).toHaveBeenCalledWith('');
     expect(loadedProducts).toEqual(dummyProductos);
-  }));
+  });
 
-  it('should search products with debounce', fakeAsync(() => {
+  it('should search products with debounce', async () => {
     fixture.detectChanges();
-    tick(300);
+    await vi.advanceTimersByTimeAsync(300);
 
-    // Cambiar término de búsqueda
     component.terminoBusquedaModel = 'Aspirina';
     component.onBusqueda();
 
-    // No debe haber llamado aún debido al debounceTime
-    expect(mockProductoService.buscarProductosParaVenta).toHaveBeenCalledTimes(1); // Solo la llamada inicial
+    expect(mockProductoService.buscarProductosParaVenta).toHaveBeenCalledTimes(1); 
 
-    tick(150); // Esperar parte del tiempo
+    await vi.advanceTimersByTimeAsync(150);
     expect(mockProductoService.buscarProductosParaVenta).toHaveBeenCalledTimes(1);
 
-    tick(150); // Completar el debounce de 300ms
+    await vi.advanceTimersByTimeAsync(150);
     expect(mockProductoService.buscarProductosParaVenta).toHaveBeenCalledTimes(2);
     expect(mockProductoService.buscarProductosParaVenta).toHaveBeenLastCalledWith('Aspirina');
-  }));
+  });
 });

@@ -23,11 +23,9 @@ export class AlmacenDashboardComponent implements OnInit {
 
   usuario: Usuario | null = this.authService.obtenerUsuarioActual();
   
-  // CORREGIDO: Migramos de Observables abstractos a arreglos estructurados nativos
   compras: CompraProveedor[] = [];
   productosGestion: Producto[] = [];
   
-  // Flags de carga explícitos para el feedback visual
   cargandoCompras: boolean = false;
   cargandoProductos: boolean = false;
 
@@ -49,7 +47,6 @@ export class AlmacenDashboardComponent implements OnInit {
     this.cargandoCompras = true;
     this.cargandoProductos = true;
 
-    // Suscripción manual y controlada para las compras
     this.compraService.getComprasParaRecepcion().subscribe({
       next: (data) => {
         this.compras = data;
@@ -63,7 +60,6 @@ export class AlmacenDashboardComponent implements OnInit {
       }
     });
 
-    // Suscripción manual y controlada para el catálogo de productos
     this.productoService.buscarProductosParaAlmacen('').subscribe({
       next: (data) => {
         this.productosGestion = data;
@@ -104,7 +100,7 @@ export class AlmacenDashboardComponent implements OnInit {
         next: () => {
           this.procesando = false;
           this.volverALista();
-          this.cargarDatosAlmacen(); // Recarga limpia de todo el árbol relacional
+          this.cargarDatosAlmacen();
         },
         error: (err) => {
           this.errorVerificacion = err.message || 'Ocurrió un error al enviar la verificación.';
@@ -131,11 +127,10 @@ export class AlmacenDashboardComponent implements OnInit {
         this.idProductoEditando = null; 
         this.mensajeExitoStock = `¡Stock de venta para "${productoActualizado.nombre}" actualizado con éxito en PostgreSQL!`;
         
-        // CORREGIDO: Modificamos las propiedades del objeto original inline para mantener la referencia intacta
         producto.stockVenta = productoActualizado.stockVenta;
         producto.stock = productoActualizado.stock; 
         
-        this.cdr.detectChanges(); // Ahora solo se repintará el input y el botón de esta fila específica
+        this.cdr.detectChanges(); 
       },
       error: (err) => {
         this.idProductoEditando = null;
@@ -146,7 +141,6 @@ export class AlmacenDashboardComponent implements OnInit {
     });
   }
 
-  // NEW: Función de identidad para optimizar el rendimiento de la directiva estructural *ngFor
   trackByProductoId(index: number, producto: Producto): string {
     return producto.id;
   }

@@ -1,6 +1,6 @@
-import { TestBed, ComponentFixture, fakeAsync, tick } from '@angular/core/testing';
-import { of, throwError } from 'rxjs';
-import { describe, beforeEach, it, expect, vi } from 'vitest';
+import { TestBed, ComponentFixture } from '@angular/core/testing';
+import { of } from 'rxjs';
+import { describe, beforeEach, afterEach, it, expect, vi } from 'vitest';
 
 import { InventarioComponent } from './inventario.component';
 import { ProductoService } from '../../../services/producto.service';
@@ -9,8 +9,6 @@ import { Producto } from '../../../models/types';
 describe('InventarioComponent', () => {
   let component: InventarioComponent;
   let fixture: ComponentFixture<InventarioComponent>;
-
-  // Mocks
   let mockProductoService: any;
 
   const dummyProductos: Producto[] = [
@@ -59,6 +57,8 @@ describe('InventarioComponent', () => {
   ];
 
   beforeEach(() => {
+    vi.useFakeTimers();
+
     mockProductoService = {
       buscarProductosParaAlmacen: vi.fn().mockReturnValue(of(dummyProductos)),
       actualizarStockVenta: vi.fn()
@@ -75,9 +75,13 @@ describe('InventarioComponent', () => {
     component = fixture.componentInstance;
   });
 
-  it('should initialize and load metrics correctly', fakeAsync(() => {
+  afterEach(() => {
+    vi.useRealTimers();
+  });
+
+  it('should initialize and load metrics correctly', async () => {
     fixture.detectChanges();
-    tick(300); // Para saltar el debounceTime(300)
+    await vi.advanceTimersByTimeAsync(300);
 
     let total = 0;
     let valor = 0;
@@ -87,54 +91,54 @@ describe('InventarioComponent', () => {
     component.valorInventario$.subscribe(v => valor = v);
     component.bajoStock$.subscribe(v => bajoStock = v);
 
-    tick();
+    await vi.advanceTimersByTimeAsync(0); // Procesa la cola de microtareas
 
     expect(component).toBeTruthy();
     expect(mockProductoService.buscarProductosParaAlmacen).toHaveBeenCalledWith('');
-    expect(total).toBe(3); // 3 productos en total
+    expect(total).toBe(3);
     expect(valor).toBe((100 * 1.5) + (10 * 2.0) + (0 * 3.5)); // 170.0
-    expect(bajoStock).toBe(2); // Ibuprofeno (bajo-stock) y Amoxicilina (agotado)
-  }));
+    expect(bajoStock).toBe(2);
+  });
 
   describe('Filters', () => {
-    it('should filter by search text (nombre/marca)', fakeAsync(() => {
+    it('should filter by search text (nombre/marca)', async () => {
       fixture.detectChanges();
-      tick(300);
+      await vi.advanceTimersByTimeAsync(300);
 
       component.busqueda = 'Bayer';
       let filtered: Producto[] = [];
       component.productosFiltrados$.subscribe(list => filtered = list);
-      tick();
+      await vi.advanceTimersByTimeAsync(0);
 
       expect(filtered.length).toBe(1);
       expect(filtered[0].nombre).toBe('Ibuprofeno');
-    }));
+    });
 
-    it('should filter by estado (agotado / bajo-stock / disponible)', fakeAsync(() => {
+    it('should filter by estado (agotado / bajo-stock / disponible)', async () => {
       fixture.detectChanges();
-      tick(300);
+      await vi.advanceTimersByTimeAsync(300);
 
       component.filtroEstado = 'agotado';
       let filtered: Producto[] = [];
       component.productosFiltrados$.subscribe(list => filtered = list);
-      tick();
+      await vi.advanceTimersByTimeAsync(0);
 
       expect(filtered.length).toBe(1);
       expect(filtered[0].nombre).toBe('Amoxicilina');
-    }));
+    });
 
-    it('should filter by categoria', fakeAsync(() => {
+    it('should filter by categoria', async () => {
       fixture.detectChanges();
-      tick(300);
+      await vi.advanceTimersByTimeAsync(300);
 
       component.filtroCategoria = 'Respiratoria';
       let filtered: Producto[] = [];
       component.productosFiltrados$.subscribe(list => filtered = list);
-      tick();
+      await vi.advanceTimersByTimeAsync(0);
 
       expect(filtered.length).toBe(1);
       expect(filtered[0].nombre).toBe('Amoxicilina');
-    }));
+    });
   });
 
   describe('Modal interactions', () => {
@@ -166,18 +170,19 @@ describe('InventarioComponent', () => {
   });
 
   describe('#guardarProducto', () => {
-    it('should call service when editando is true and has product id', fakeAsync(() => {
+    it('should call service when editando is true and has product id', async () => {
       mockProductoService.actualizarStockVenta.mockReturnValue(of(dummyProductos[0]));
       fixture.detectChanges();
-      tick(300);
+      await vi.advanceTimersByTimeAsync(300);
 
       component.editarProducto(dummyProductos[0]);
       component.productoForm.stockVenta = 50;
       component.guardarProducto();
+      await vi.advanceTimersByTimeAsync(0);
 
       expect(mockProductoService.actualizarStockVenta).toHaveBeenCalledWith('PROD-1', 50);
       expect(component.mostrarModal).toBe(false);
-    }));
+    });
 
     it('should not call service if not editando', () => {
       fixture.detectChanges();

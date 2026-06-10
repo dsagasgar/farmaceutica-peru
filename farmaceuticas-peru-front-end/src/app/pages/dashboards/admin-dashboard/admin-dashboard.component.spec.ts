@@ -83,7 +83,7 @@ describe('AdminDashboardComponent', () => {
   });
 
   it('should create the component and load initial stats', () => {
-    fixture.detectChanges(); // Ejecuta ngOnInit
+    fixture.detectChanges();
     
     expect(component).toBeTruthy();
     expect(mockAuthService.obtenerUsuarioActual).toHaveBeenCalled();
@@ -107,14 +107,12 @@ describe('AdminDashboardComponent', () => {
     ];
     mockCompraService.getTodasLasCompras.mockReturnValue(of(compras));
 
-    fixture.detectChanges(); // ngOnInit
+    fixture.detectChanges();
     
-    // Cambiar a pestaña ventas
     component.cambiarPestana('ventas');
     expect(component.pestanaActiva).toBe('ventas');
     expect(mockCompraService.getTodasLasCompras).not.toHaveBeenCalled();
 
-    // Cambiar a pestaña almacen (debería cargar compras)
     component.cambiarPestana('almacen');
     expect(component.pestanaActiva).toBe('almacen');
     expect(mockCompraService.getTodasLasCompras).toHaveBeenCalled();

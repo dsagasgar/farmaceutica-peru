@@ -36,7 +36,6 @@ describe('AuthService', () => {
     service = TestBed.inject(AuthService);
     httpMock = TestBed.inject(HttpTestingController);
     
-    // Limpiar localStorage antes de cada prueba
     localStorage.clear();
   });
 
@@ -76,7 +75,6 @@ describe('AuthService', () => {
       localStorage.setItem('token', 'mock-jwt-token');
       localStorage.setItem('usuario', JSON.stringify(dummyUser));
 
-      // Forzar recarga interna de sesión en el servicio para este caso
       (service as any).cargarSesion();
       expect(service.obtenerUsuarioActual()).toEqual(dummyUser);
 

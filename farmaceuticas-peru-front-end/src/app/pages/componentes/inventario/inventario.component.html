@@ -6,7 +6,6 @@
 
   <div class="controles">
     <div class="search-group">
-      <!-- Escucha activa mediante el evento onBusqueda() al escribir -->
       <input type="text" [(ngModel)]="busqueda" (input)="onBusqueda()" placeholder="Buscar producto por nombre o marca..."/>
     </div>
     <div class="filter-group">
@@ -25,7 +24,6 @@
       </select>
     </div>
     
-    <!-- CONTADORES: Corregidos con tuberías asíncronas para resolver los errores ngtsc -->
     <div class="stats">
       <div class="stat">
         <span class="label">Total Ítems:</span>
@@ -59,13 +57,11 @@
         </tr>
       </thead>
       <tbody>
-        <!-- Iteración asíncrona sobre el flujo filtrado -->
         <tr *ngFor="let producto of (productosFiltrados$ | async)" [ngClass]="'estado-' + calcularEstado(producto)">
           <td class="nombre">{{ producto.nombre }} <small>({{ producto.codigo }})</small></td>
           <td>{{ producto.marca }}</td>
           <td>{{ producto.categoria }}</td>
           <td class="cantidad">{{ producto.stock }}</td>
-          <!-- Campo interactivo para delimitar stockVenta en mostrador -->
           <td><strong>{{ producto.stockVenta }}</strong></td>
           <td class="precio">{{ producto.precioUnitario | currency:'S/ ' }}</td>
           <td>{{ producto.fechaVencimiento | date:'dd/MM/yyyy' }}</td>
@@ -87,7 +83,6 @@
     </div>
   </div>
 
-  <!-- Modal para agregar/editar producto -->
   <div *ngIf="mostrarModal" class="modal-overlay" (click)="cerrarModal()">
     <div class="modal-contenido" (click)="$event.stopPropagation()">
       <h2>{{ editando ? 'Modificar Cuota de Venta' : 'Visualizar Registro' }}</h2>
@@ -114,7 +109,6 @@
           <input type="number" [(ngModel)]="productoForm.precioUnitario" readonly disabled/>
         </div>
         <div class="form-group">
-          <!-- Único campo editable por el Almacenero para la HU de asignación -->
           <label style="color: #0056b3;">Stock para Venta al Público</label>
           <input type="number" [(ngModel)]="productoForm.stockVenta" min="0" [max]="productoForm.stock"/>
         </div>

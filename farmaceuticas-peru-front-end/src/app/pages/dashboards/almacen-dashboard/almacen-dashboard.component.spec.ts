@@ -55,7 +55,6 @@ describe('AlmacenDashboardComponent', () => {
       stock: 100,
       stockVenta: 40,
       categoria: 'Gastro',
-      customName: 'Genfar',
       fechaVencimiento: '2028-12-31',
       lote: 'L100',
       formato: 'Pastilla',
@@ -131,8 +130,16 @@ describe('AlmacenDashboardComponent', () => {
       component.enviarVerificacion();
 
       expect(mockCompraService.registrarRecepcion).toHaveBeenCalledWith(
-        dummyCompras[0].id,
-        component.itemsVerificacion,
+        'COMPRA-1',
+        [
+          {
+            productoId: "PROD-1",
+            nombreProducto: "Paracetamol",
+            cantidadPedida: 100,
+            cantidadRecibida: 100,
+            costoUnitario: 1.5,
+          }
+        ],
         'Todo OK'
       );
       expect(component.procesando).toBe(false);

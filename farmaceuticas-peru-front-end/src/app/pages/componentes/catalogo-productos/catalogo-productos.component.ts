@@ -22,18 +22,14 @@ export class CatalogoProductosComponent implements OnInit {
 
   ngOnInit(): void {
     this.productos$ = this.busquedaSubject.pipe(
-      startWith(''), // Realiza una búsqueda inicial con un string vacío para cargar todo.
-      // Espera 300ms después de la última pulsación antes de actuar
+      startWith(''),
       debounceTime(300),
-      // Ignora si el nuevo término es igual al anterior
       distinctUntilChanged(),
-      // Cambia a la nueva búsqueda y cancela la anterior
       switchMap((term: string) => this.productoService.buscarProductosParaVenta(term)),
     );
   }
 
   onBusqueda(): void {
-    // Cada vez que el modelo cambia, emitimos el nuevo valor al subject.
     this.busquedaSubject.next(this.terminoBusquedaModel);
   }
 }

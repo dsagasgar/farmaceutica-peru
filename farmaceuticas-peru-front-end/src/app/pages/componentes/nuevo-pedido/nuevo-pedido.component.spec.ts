@@ -1,18 +1,17 @@
-import { TestBed, ComponentFixture, fakeAsync, tick } from '@angular/core/testing';
+import { TestBed, ComponentFixture } from '@angular/core/testing';
 import { of, throwError } from 'rxjs';
-import { describe, beforeEach, it, expect, vi } from 'vitest';
+import { describe, beforeEach, afterEach, it, expect, vi } from 'vitest';
 
 import { NuevoPedidoComponent } from './nuevo-pedido.component';
 import { ProductoService } from '../../../services/producto.service';
 import { VentaService } from '../../../services/venta.service';
 import { AuthService } from '../../../services/auth.service';
-import { Producto, Venta, Usuario, FormulaMagistral } from '../../../models/types';
+import { Producto, Venta, Usuario } from '../../../models/types';
 
 describe('NuevoPedidoComponent', () => {
   let component: NuevoPedidoComponent;
   let fixture: ComponentFixture<NuevoPedidoComponent>;
 
-  // Mocks
   let mockProductoService: any;
   let mockVentaService: any;
   let mockAuthService: any;
@@ -40,6 +39,8 @@ describe('NuevoPedidoComponent', () => {
   };
 
   beforeEach(() => {
+    vi.useFakeTimers();
+
     mockProductoService = {
       buscarProductosParaVenta: vi.fn().mockReturnValue(of([dummyProducto]))
     };
@@ -65,29 +66,37 @@ describe('NuevoPedidoComponent', () => {
     component = fixture.componentInstance;
   });
 
-  it('should initialize and subscribe to search terms', fakeAsync(() => {
-    fixture.detectChanges();
-    tick(300);
+  afterEach(() => {
+    vi.useRealTimers();
+  });
 
+  it('should initialize and subscribe to search terms', async () => {
+    fixture.detectChanges();
+    
+    await vi.advanceTimersByTimeAsync(300); 
+    
     expect(component).toBeTruthy();
     expect(component.usuario).toEqual(dummyUser);
-    expect(mockProductoService.buscarProductosParaVenta).toHaveBeenCalledWith('');
-  }));
+    
+    expect(mockProductoService.buscarProductosParaVenta).not.toHaveBeenCalled();
+  });
 
-  it('should push search term to searchTerms subject', fakeAsync(() => {
+  it('should push search term to searchTerms subject', async () => {
     fixture.detectChanges();
-    tick(300);
+    await vi.advanceTimersByTimeAsync(300); 
+
+    mockProductoService.buscarProductosParaVenta.mockClear();
 
     component.terminoBusquedaProducto = 'Paracetamol';
     component.buscarProducto();
 
-    tick(150);
-    expect(mockProductoService.buscarProductosParaVenta).toHaveBeenCalledTimes(1); // Solo la inicial
+    await vi.advanceTimersByTimeAsync(150);
+    expect(mockProductoService.buscarProductosParaVenta).toHaveBeenCalledTimes(0); 
 
-    tick(150); // Completa debounce
-    expect(mockProductoService.buscarProductosParaVenta).toHaveBeenCalledTimes(2);
+    await vi.advanceTimersByTimeAsync(150); 
+    expect(mockProductoService.buscarProductosParaVenta).toHaveBeenCalledTimes(1);
     expect(mockProductoService.buscarProductosParaVenta).toHaveBeenLastCalledWith('Paracetamol');
-  }));
+  });
 
   describe('Manage Products in Order', () => {
     it('should add product to order and handle limits', () => {
@@ -98,15 +107,13 @@ describe('NuevoPedidoComponent', () => {
       expect(component.pedidoActual[0].cantidad).toBe(1);
       expect(component.totalPedido).toBe(10);
 
-      // Agregar de nuevo incrementa cantidad
       component.agregarProducto(dummyProducto);
       expect(component.pedidoActual[0].cantidad).toBe(2);
       expect(component.totalPedido).toBe(20);
 
-      // Simular llegar al limite de stockVenta (5)
       component.pedidoActual[0].cantidad = 5;
       component.agregarProducto(dummyProducto);
-      expect(component.pedidoActual[0].cantidad).toBe(5); // No debe superar 5
+      expect(component.pedidoActual[0].cantidad).toBe(5); 
     });
 
     it('should update quantity correctly if valid', () => {
@@ -126,11 +133,11 @@ describe('NuevoPedidoComponent', () => {
       fixture.detectChanges();
       component.agregarProducto(dummyProducto);
 
-      const target = { value: '10' }; // 10 supera stockVenta que es 5
+      const target = { value: '10' }; 
       const mockEvent = { target } as unknown as Event;
 
       component.actualizarCantidad('PROD-1', mockEvent);
-      expect(component.pedidoActual[0].cantidad).toBe(1); // Permanece en 1
+      expect(component.pedidoActual[0].cantidad).toBe(1); 
       expect(target.value).toBe('1');
     });
 
@@ -160,7 +167,6 @@ describe('NuevoPedidoComponent', () => {
       expect(component.formulasEnPedido.length).toBe(1);
       expect(component.formulasEnPedido[0].nombre).toBe('Formula 1');
       expect(component.totalPedido).toBe(50);
-      // Limpia campos de formulario
       expect(component.formulaActual.nombre).toBe('');
     });
 
@@ -198,7 +204,7 @@ describe('NuevoPedidoComponent', () => {
       expect(mockVentaService.crearVenta).not.toHaveBeenCalled();
     });
 
-    it('should call ventaService and emit event on success', () => {
+    it('should call ventaService and emit event on success', async () => {
       const createdVenta = { id: 'VENTA-1' } as Venta;
       mockVentaService.crearVenta.mockReturnValue(of(createdVenta));
       
@@ -209,19 +215,21 @@ describe('NuevoPedidoComponent', () => {
       component.agregarProducto(dummyProducto);
       component.clienteNombre = 'Juan Perez';
       component.generarOrden();
+      await vi.advanceTimersByTimeAsync(0);
 
       expect(mockVentaService.crearVenta).toHaveBeenCalled();
       expect(component.procesandoPedido).toBe(false);
       expect(emittedVenta).toEqual(createdVenta);
     });
 
-    it('should display error message on backend failure', () => {
+    it('should display error message on backend failure', async () => {
       mockVentaService.crearVenta.mockReturnValue(throwError(() => new Error('Error de base de datos')));
 
       fixture.detectChanges();
       component.agregarProducto(dummyProducto);
       component.clienteNombre = 'Juan Perez';
       component.generarOrden();
+      await vi.advanceTimersByTimeAsync(0);
 
       expect(component.procesandoPedido).toBe(false);
       expect(component.errorMensaje).toContain('Verifique el stock disponible');

@@ -11,7 +11,6 @@
   </header>
 
   <main class="dashboard-main">
-    <!-- HU1: Recepción de Compras -->
     <section class="dashboard-section">
       <h2 class="section-title">Recepción de Compras de Proveedores</h2>
       <p class="section-description">
@@ -88,7 +87,6 @@
       </div>
     </section>
 
-    <!-- GESTIÓN DE STOCK PARA VENTA -->
     <section class="dashboard-section">
       <h2 class="section-title">Gestión de Stock para Venta</h2>
       <p class="section-description">
@@ -115,7 +113,6 @@
             </thead>
             <tbody>
               <ng-container *ngIf="!cargandoProductos; else loadingStock">
-                <!-- CORREGIDO: Se añade trackBy para bloquear re-renders globales e innecesarios -->
                 <tr *ngFor="let producto of productosGestion; trackBy: trackByProductoId">
                   <td>{{ producto.nombre }} ({{ producto.codigo }})</td>
                   <td class="text-center">{{ producto.stock }}</td>

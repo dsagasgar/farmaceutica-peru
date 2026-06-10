@@ -28,10 +28,8 @@ export class AdminDashboardComponent implements OnInit {
   stats$!: Observable<AdminStats>;
   actividadReciente$!: Observable<ActividadReciente[]>;
 
-  // MANAGEMENT STATE: Control de navegación interna sin recargar pantalla
   pestanaActiva: 'stats' | 'ventas' | 'almacen' = 'stats';
 
-  // AUDIT SUB-STATES: Variables destinadas al análisis gerencial
   idVentaBusqueda: string = '';
   ventaAuditoria: Venta | null = null;
   buscandoVenta: boolean = false;
@@ -52,7 +50,6 @@ export class AdminDashboardComponent implements OnInit {
   cambiarPestana(nuevaPestana: 'stats' | 'ventas' | 'almacen'): void {
     this.pestanaActiva = nuevaPestana;
     
-    // Lazy-loading logic: Extraemos la data solo cuando el usuario hace clic en el tab
     if (nuevaPestana === 'almacen') {
       this.cargarComprasParaAuditoria();
     }
@@ -88,7 +85,6 @@ export class AdminDashboardComponent implements OnInit {
     this.cargandoCompras = true;
     this.cdr.detectChanges();
 
-    // CORREGIDO: Cambiado a getTodasLasCompras para que persistan los registros recibidos
     this.compraService.getTodasLasCompras().subscribe({
       next: (data) => {
         this.comprasAuditoria = data;
