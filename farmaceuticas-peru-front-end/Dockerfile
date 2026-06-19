@@ -2,10 +2,12 @@
 FROM node:20-alpine AS build
 WORKDIR /app
 
-COPY package*.json ./
+# 1. Copia los archivos de dependencias desde la subcarpeta
+COPY farmaceuticas-peru-front-end/package*.json ./
 RUN npm install
 
-COPY . .
+# 2. Copia TODO el contenido de la subcarpeta del front directamente al WORKDIR (/app)
+COPY farmaceuticas-peru-front-end/. .
 RUN npm run build -- --configuration=production
 
 FROM nginx:alpine
