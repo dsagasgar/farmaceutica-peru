@@ -1,11 +1,11 @@
-# 1. SECCIÓN DE BASES DE DATOS (Separada de los servicios)
+# 1. SECCIÓN DE BASES DE DATOS
 databases:
   - name: postgres-db
     databaseName: farmaceuticas_peru_db
     user: farma_admin
     plan: free
 
-# 2. SECCIÓN DE SERVICIOS (Backend y Frontend)
+# 2. SECCIÓN DE SERVICIOS
 services:
   # BACKEND (Spring Boot mediante Docker)
   - type: web
@@ -46,4 +46,4 @@ services:
         fromService:
           type: web
           name: backend-api
-          property: url
+          property: host # CORREGIDO: De 'url' a 'host'
