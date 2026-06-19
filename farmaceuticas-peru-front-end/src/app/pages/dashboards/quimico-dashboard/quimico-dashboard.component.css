@@ -1,137 +1,121 @@
-:host {
-  display: block;
-  background-color: #f0f2f5;
-  min-height: 100dvh;
-}
-.dashboard-container {
-  display: flex;
-  flex-direction: column;
-}
-.dashboard-header {
-  background: white;
-  padding: 1rem 2rem;
-  border-bottom: 1px solid #dee2e6;
-  box-shadow: 0 2px 4px rgba(0,0,0,0.05);
-}
-.header-content {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  max-width: 1400px;
-  margin: 0 auto;
-}
-h1 {
-  margin: 0;
-  font-size: 1.5rem;
-  color: #343a40;
-  font-weight: 600;
-}
-.user-info { 
-  display: flex; 
-  align-items: center; 
-  gap: 1rem; 
-}
-.user-name { 
-  font-weight: 600; 
-  color: #495057; 
-}
-.user-role { 
-  background: #e9ecef; 
-  color: #495057; 
-  padding: 0.25rem 0.75rem; 
-  border-radius: 1rem; 
-  font-size: 0.8rem; 
-  font-weight: 500; 
-}
-.logout-btn { 
-  background: #dc3545; 
-  color: white; 
-  border: none; 
-  padding: 0.5rem 1rem; 
-  border-radius: 6px; 
-  cursor: pointer; 
-  font-weight: 500; 
-  transition: background-color 0.2s; 
-}
-.logout-btn:hover { 
-  background: #c82333; 
-}
-.dashboard-main { 
-  padding: 2rem; 
-  max-width: 1400px; 
-  margin: 0 auto; 
-  width: 100%; 
-}
-.dashboard-section {
-  background: white;
-  border: 1px solid #dee2e6;
-  border-radius: 8px;
-  padding: 1.5rem;
-  margin-bottom: 2rem;
-  box-shadow: 0 2px 4px rgba(0,0,0,0.02);
-}
-.section-title { 
-  font-size: 1.25rem; 
-  color: #343a40; 
-  margin: 0 0 0.5rem 0; 
-  font-weight: 600; 
-}
-.section-description { 
-  font-size: 0.95rem; 
-  color: #6c757d; 
-  margin-bottom: 1.5rem; 
-}
-.action-btn { 
-  background-color: #0056b3; 
-  color: white; 
-  border: none; 
-  padding: 0.6rem 1.4rem; 
-  border-radius: 6px; 
-  cursor: pointer; 
-  font-weight: 600; 
-  transition: opacity 0.2s ease;
-}
-.action-btn:hover {
-  opacity: 0.9;
-}
-.action-btn:disabled { 
-  background-color: #6c757d; 
-  cursor: not-allowed; 
-}
+/* ==========================================================================
+   DASHBOARD BASE STRUCTURE (Estructura base del panel)
+   ========================================================================== */
+.dashboard-container { display: flex; flex-direction: column; min-height: 100vh; background-color: #f8fafc; font-family: system-ui, -apple-system, sans-serif; }
+.dashboard-header { background-color: #ffffff; border-bottom: 1px solid #e2e8f0; padding: 1rem 1.5rem; }
+.header-content { display: flex; justify-content: space-between; align-items: center; max-width: 1200px; margin: 0 auto; width: 100%; }
+.header-content h1 { margin: 0; font-size: 1.25rem; font-weight: 700; color: #0f172a; }
+.user-info { display: flex; align-items: center; gap: 1rem; }
+.user-name { font-weight: 500; color: #334155; }
+.user-role { font-size: 0.75rem; background-color: #f1f5f9; padding: 0.25rem 0.5rem; border-radius: 4px; color: #64748b; font-weight: 600; }
+.logout-btn { background-color: #ef4444; color: white; border: none; padding: 0.4rem 0.8rem; border-radius: 6px; cursor: pointer; font-size: 0.875rem; transition: background-color 0.2s; }
+.logout-btn:hover { background-color: #dc2626; }
+
+.dashboard-main { flex: 1; padding: 1.5rem; max-width: 1200px; width: 100%; margin: 0 auto; display: flex; flex-direction: column; gap: 1.5rem; }
+.dashboard-section { background: #ffffff; border-radius: 12px; padding: 1.5rem; box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 2px 4px -1px rgba(0, 0, 0, 0.03); border: 1px solid #e2e8f0; }
+.section-title { font-size: 1.1rem; font-weight: 600; color: #1e293b; margin: 0 0 0.25rem 0; }
+.section-description { font-size: 0.875rem; color: #64748b; margin: 0 0 1rem 0; }
+.orders-section { border-left: 5px solid #0284c7; }
+
+.action-btn { background-color: #0284c7; color: white; font-weight: 600; padding: 0.75rem 1.5rem; border: none; border-radius: 6px; cursor: pointer; transition: background-color 0.2s; }
+.action-btn:hover { background-color: #0369a1; }
+.orden-generada-info { margin-top: 1rem; padding: 1rem; background-color: #f0fdf4; border: 1px solid #bbf7d0; border-radius: 6px; color: #166534; }
+.orden-id { font-family: monospace; font-size: 1.25rem; font-weight: bold; background: #e2e8f0; padding: 0.5rem; border-radius: 4px; display: inline-block; margin-top: 0.5rem; color: #1e293b; }
+
 
 /* ==========================================================================
-   MODIFICADO: Contenedor Informativo del Ticket Generado (Dispatch Alert)
+   KILL DROPDOWN BEHAVIOR (Neutralizar el comportamiento desplegable)
    ========================================================================== */
-.orden-generada-info { 
-  margin-top: 1.5rem; 
-  padding: 1.25rem; 
-  background-color: #d4edda; 
-  border: 1px solid #c3e6cb; 
-  border-radius: 6px; 
-  text-align: center; 
-  color: #155724;
+/* Forzamos a que cualquier lista de búsqueda en el pedido se quede pegada al DOM como un bloque normal */
+::ng-deep app-nuevo-pedido .resultados-busqueda,
+::ng-deep app-nuevo-pedido .sugerencias,
+::ng-deep app-nuevo-pedido ul,
+::ng-deep app-nuevo-pedido .dropdown-menu {
+  position: static !important; /* Elimina la capa flotante / Removes absolute floating */
+  display: block !important;   /* Visible por defecto / Always visible */
+  box-shadow: none !important;
+  margin-top: 1rem !important;
 }
-.success-title {
-  font-size: 1.1rem;
-  font-weight: 700;
-  margin: 0 0 0.5rem 0;
+
+
+/* ==========================================================================
+   THE SCROLLING BOX (La caja con scroll y recuadro para AMBOS momentos)
+   ========================================================================== */
+/* Apuntamos a los contenedores de listas de ambos componentes simultáneamente */
+::ng-deep app-catalogo-productos table,
+::ng-deep app-catalogo-productos .table-container,
+::ng-deep app-catalogo-productos ul,
+::ng-deep app-nuevo-pedido table,
+::ng-deep app-nuevo-pedido .table-container,
+::ng-deep app-nuevo-pedido .resultados-busqueda {
+  display: block !important;
+  width: 100% !important;
+  max-height: 350px !important; /* Altura máxima estática / Fixed max height */
+  overflow-y: auto !important; /* Scroll vertical */
+  overflow-x: auto !important; /* Scroll horizontal si es necesario / Horizontal scroll if needed */
+  border: 1px solid #94a3b8 !important; /* EL CUADRO GRIS / The grey box */
+  border-radius: 8px !important;
+  background-color: #ffffff !important;
+  margin-top: 1rem !important;
+  margin-bottom: 1rem !important;
 }
-.orden-id { 
-  background: #28a745; 
-  color: white; 
-  padding: 0.6rem 1.5rem; 
-  border-radius: 4px; 
-  display: inline-block; 
-  font-size: 1.25rem; 
-  font-weight: bold; 
-  margin-top: 0.75rem; 
-  letter-spacing: 0.5px;
-  box-shadow: 0 2px 4px rgba(40, 167, 69, 0.2);
+
+
+/* ==========================================================================
+   EXPAND COLUMNS (Expandir columnas para evitar la compresión a la izquierda)
+   ========================================================================== */
+/* Forzamos a que las tablas utilicen todo el ancho de la ventana */
+::ng-deep app-catalogo-productos table,
+::ng-deep app-nuevo-pedido table {
+  width: 100% !important;
+  min-width: 900px !important; /* Evita que las columnas colapsen / Prevents columns from collapsing */
+  border-collapse: collapse !important;
+  table-layout: auto !important;
 }
-.animate-fade-in { 
-  animation: fadeIn 0.4s ease-out; 
+
+/* Estilos de cabecera estáticos (Sticky headers) */
+::ng-deep app-catalogo-productos th,
+::ng-deep app-nuevo-pedido th {
+  position: sticky !important;
+  top: 0 !important;
+  z-index: 10 !important;
+  background-color: #f1f5f9 !important;
+  padding: 0.8rem 1rem !important;
+  text-align: left !important;
+  font-weight: 600 !important;
+  color: #334155 !important;
+  border-bottom: 2px solid #cbd5e1 !important;
+  white-space: nowrap !important; /* Evita que el texto de la cabecera se quiebre en dos líneas */
 }
-@keyframes fadeIn { 
-  from { opacity: 0; transform: translateY(-5px); } 
-  to { opacity: 1; transform: translateY(0); } 
+
+/* Espaciado de celdas (Cell padding) */
+::ng-deep app-catalogo-productos td,
+::ng-deep app-nuevo-pedido td {
+  padding: 0.75rem 1rem !important;
+  border-bottom: 1px solid #e2e8f0 !important;
+  color: #475569 !important;
+}
+
+
+/* ==========================================================================
+   SCROLLBAR STYLES (Estilos de barra de desplazamiento)
+   ========================================================================== */
+::ng-deep app-catalogo-productos table::-webkit-scrollbar,
+::ng-deep app-nuevo-pedido table::-webkit-scrollbar,
+::ng-deep app-nuevo-pedido .resultados-busqueda::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+::ng-deep app-catalogo-productos table::-webkit-scrollbar-thumb,
+::ng-deep app-nuevo-pedido table::-webkit-scrollbar-thumb,
+::ng-deep app-nuevo-pedido .resultados-busqueda::-webkit-scrollbar-thumb {
+  background: #cbd5e1;
+  border-radius: 8px;
+}
+
+::ng-deep app-catalogo-productos table::-webkit-scrollbar-track,
+::ng-deep app-nuevo-pedido table::-webkit-scrollbar-track,
+::ng-deep app-nuevo-pedido .resultados-busqueda::-webkit-scrollbar-track {
+  background: #f8fafc;
 }

@@ -12,7 +12,6 @@ import { AuthService } from '../../services/auth.service';
   styleUrl: './login.component.css'
 })
 export class LoginComponent {
-  // MODERNIZED: Clean dependency injection using functional tokens
   private authService = inject(AuthService);
   private router = inject(Router);
 
@@ -36,7 +35,6 @@ export class LoginComponent {
         this.procesando = false;
         const usuario = response.user;
         
-        // Symmetrical routing contract mapping matching our dashboards path layouts
         const rutaPorRol: Record<string, string> = {
           'ADMINISTRADOR': '/dashboard/administrador',
           'CAJERO': '/dashboard/cajero',

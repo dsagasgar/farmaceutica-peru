@@ -1,0 +1,49 @@
+# 1. SECCIÓN DE BASES DE DATOS
+databases:
+  - name: postgres-db
+    databaseName: farmaceuticas_peru_db
+    user: farma_admin
+    plan: free
+
+# 2. SECCIÓN DE SERVICIOS
+services:
+  # BACKEND (Spring Boot mediante Docker)
+  - type: web
+    name: backend-api
+    env: docker
+    dockerfilePath: ./farmaceuticas-peru-back-end/Dockerfile
+    dockerContext: ./farmaceuticas-peru-back-end
+    plan: free
+    envVars:
+      - key: DB_HOST
+        fromDatabase:
+          name: postgres-db
+          property: host
+      - key: DB_NAME
+        fromDatabase:
+          name: postgres-db
+          property: database
+      - key: DB_USER
+        fromDatabase:
+          name: postgres-db
+          property: user
+      - key: DB_PASSWORD
+        fromDatabase:
+          name: postgres-db
+          property: password
+      - key: PORT
+        value: 8081
+
+  # FRONTEND (Angular + Nginx mediante Docker)
+  - type: web
+    name: frontend-app
+    env: docker
+    dockerfilePath: ./farmaceuticas-peru-front-end/Dockerfile
+    dockerContext: .
+    plan: free
+    envVars:
+      - key: BACKEND_URL
+        fromService:
+          type: web
+          name: backend-api
+          property: host # CORREGIDO: De 'url' a 'host'

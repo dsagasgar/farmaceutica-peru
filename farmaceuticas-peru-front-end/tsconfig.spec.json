@@ -1,9 +1,13 @@
+<<<<<<< HEAD
 /* To learn more about Typescript configuration file: https://www.typescriptlang.org/docs/handbook/tsconfig-json.html. */
 /* To learn more about Angular compiler options: https://angular.dev/reference/configs/angular-compiler-options. */
+=======
+>>>>>>> 0652eeafdcae90cc961c68f508293576b946145a
 {
   "extends": "./tsconfig.json",
   "compilerOptions": {
     "outDir": "./out-tsc/spec",
+<<<<<<< HEAD
     "types": [
       "vitest/globals"
     ]
@@ -14,3 +18,14 @@
     "src/test-setup.ts"
   ]
 }
+=======
+    "moduleResolution": "bundler", 
+    "types": ["vitest/globals", "node"],
+    "rootDir": "."
+  },
+  "include": [
+    "src/**/*.spec.ts",
+    "src/**/*.d.ts"
+  ]
+}
+>>>>>>> 0652eeafdcae90cc961c68f508293576b946145a

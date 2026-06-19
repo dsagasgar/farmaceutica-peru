@@ -41,7 +41,7 @@ export interface Producto {
   stockVenta: number;
   categoria: string;
   marca: string;
-  fechaVencimiento: string; // ISO Date string
+  fechaVencimiento: string;
   lote: string;
   formato: string;
 }
@@ -65,7 +65,7 @@ export interface FormulaMagistral {
 
 export interface Venta {
   id: string;
-  fecha: string; // ISO Date string
+  fecha: string;
   items: ItemVenta[];
   itemsFormula: FormulaMagistral[];
   total: number;

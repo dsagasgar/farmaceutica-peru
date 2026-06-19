@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 import { defineConfig } from 'vitest/config';
 import { resolve, relative } from 'path';
 
@@ -24,3 +25,16 @@ export default defineConfig({
     setupFiles: ['src/test-setup.ts'],
   },
 });
+=======
+/// <reference types="vitest" />
+import { defineConfig } from 'vitest/config';
+
+export default defineConfig({
+  test: {
+    globals: true,
+    environment: 'jsdom',
+    setupFiles: ['node_modules/zone.js/fesm2022/zone-testing.bundle.js', 'src/test.ts'],
+    include: ['src/**/*.spec.ts'],
+  },
+});
+>>>>>>> 0652eeafdcae90cc961c68f508293576b946145a

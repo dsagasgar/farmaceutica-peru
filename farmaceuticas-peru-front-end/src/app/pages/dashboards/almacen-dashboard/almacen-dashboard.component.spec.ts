@@ -130,6 +130,7 @@ describe('AlmacenDashboardComponent', () => {
       component.enviarVerificacion();
 
       expect(mockCompraService.registrarRecepcion).toHaveBeenCalledWith(
+<<<<<<< HEAD
         dummyCompras[0].id,
         [
           {
@@ -138,6 +139,16 @@ describe('AlmacenDashboardComponent', () => {
             cantidadPedida: 100,
             cantidadRecibida: 100,
             costoUnitario: 1.5
+=======
+        'COMPRA-1',
+        [
+          {
+            productoId: "PROD-1",
+            nombreProducto: "Paracetamol",
+            cantidadPedida: 100,
+            cantidadRecibida: 100,
+            costoUnitario: 1.5,
+>>>>>>> 0652eeafdcae90cc961c68f508293576b946145a
           }
         ],
         'Todo OK'

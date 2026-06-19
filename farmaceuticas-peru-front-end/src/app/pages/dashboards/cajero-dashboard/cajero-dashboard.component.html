@@ -19,7 +19,6 @@
       <div class="section-content">
         <div class="orden-venta-container">
           
-          <!-- Paso 1: Buscador de Orden (Unlocks cleanly without HTML disabled freezing traps) -->
           <div class="buscador-orden">
             <label for="ordenId">ID de la Orden de Venta:</label>
             <div class="input-group">
@@ -37,7 +36,6 @@
             <div *ngIf="errorBusqueda" class="error-msg">{{ errorBusqueda }}</div>
           </div>
 
-          <!-- Paso 2: Detalles de la Orden y Pago -->
           <div *ngIf="ordenSeleccionada" class="detalle-orden animate-fade-in">
             <h3>Detalles de la Orden: {{ ordenSeleccionada.id }}</h3>
             <div class="info-cliente">
@@ -45,7 +43,6 @@
               <span><strong>Fecha:</strong> {{ ordenSeleccionada.fecha }}</span>
             </div>
             
-            <!-- Medicamentos Comerciales (CORREGIDO: Se removió el ?. para solucionar el error NG8107) -->
             <table class="items-table" *ngIf="ordenSeleccionada.items && ordenSeleccionada.items.length > 0">
               <thead>
                 <tr>
@@ -65,7 +62,6 @@
               </tbody>
             </table>
 
-            <!-- Fórmulas Magistrales (CORREGIDO: Se removió el ?. para solucionar el error NG8107) -->
             <div *ngIf="ordenSeleccionada.itemsFormula && ordenSeleccionada.itemsFormula.length > 0" class="formulas-seccion">
               <h4 class="subtitulo-formulas">Fórmulas Magistrales Preparadas</h4>
               <table class="items-table formulas-table">
@@ -86,7 +82,6 @@
               </table>
             </div>
 
-            <!-- Tabla de Cierre con el Total Integrado de PostgreSQL -->
             <table class="items-table total-table">
               <tfoot>
                 <tr>

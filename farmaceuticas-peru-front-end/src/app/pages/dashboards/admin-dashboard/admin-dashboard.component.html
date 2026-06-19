@@ -10,7 +10,6 @@
       </div>
     </div>
     
-    <!-- SUB-NAVBAR DE AUDITORÍA -->
     <nav class="admin-tabs-nav">
       <button (click)="cambiarPestana('stats')" [class.tab-active]="pestanaActiva === 'stats'">Métricas Generales</button>
       <button (click)="cambiarPestana('ventas')" [class.tab-active]="pestanaActiva === 'ventas'">Auditoría de Ventas</button>
@@ -18,10 +17,8 @@
     </nav>
   </header>
 
-  <!-- CONTENIDO PRINCIPAL -->
   <main class="dashboard-main">
 
-    <!-- ================= SECCIÓN 1: MÉTRICAS Y ESTADÍSTICAS ================= -->
     <div *ngIf="pestanaActiva === 'stats'" class="animate-fade-in">
       <ng-container *ngIf="stats$ | async as stats; else loadingStats">
         <section class="stats-section">
@@ -49,7 +46,6 @@
       </ng-container>
     </div>
 
-    <!-- ================= SECCIÓN 2: AUDITORÍA DE VENTAS ================= -->
     <div *ngIf="pestanaActiva === 'ventas'" class="animate-fade-in">
       <section class="dashboard-section">
         <h2>Consola de Auditoría Financiera</h2>
@@ -65,14 +61,12 @@
           <div *ngIf="errorVenta" class="error-msg">{{ errorVenta }}</div>
         </div>
 
-        <!-- Ficha de Datos Cruzados Auditados -->
         <div *ngIf="ventaAuditoria" class="detalle-orden animate-fade-in">
           <div class="card-auditoria-header">
             <h3>Documento Electrónico: {{ ventaAuditoria.id }}</h3>
             <span class="user-role">ESTADO: {{ ventaAuditoria.estado }}</span>
           </div>
 
-          <!-- TRAZABILIDAD DE EMPLEADOS IMPLICADOS -->
           <div class="grid-trazabilidad">
             <div class="card-empleado border-quimico">
               <p class="label-empleado">Responsable Clínico (Químico)</p>
@@ -111,7 +105,6 @@
             </tbody>
           </table>
 
-          <!-- Fórmulas Clínicas -->
           <div *ngIf="ventaAuditoria.itemsFormula && ventaAuditoria.itemsFormula.length > 0">
             <h4 style="margin-top: 1.5rem;">Fórmulas Magistrales de Laboratorio Interno</h4>
             <table class="items-table formulas-table">
@@ -140,7 +133,6 @@
       </section>
     </div>
 
-    <!-- ================= SECCIÓN 3: CONSOLA LOGÍSTICA HISTÓRICA ================= -->
     <div *ngIf="pestanaActiva === 'almacen'" class="animate-fade-in">
       <section class="dashboard-section">
         <h2>Consola de Control de Suministros e Inventario</h2>
@@ -151,7 +143,6 @@
           No se registran bitácoras de compra en el sistema.
         </div>
 
-        <!-- CORREGIDO: Contenedor elástico con gap que aplica la separación en desktop de forma nativa -->
         <div *ngIf="!cargandoCompras && comprasAuditoria.length > 0" class="compras-list">
           <div *ngFor="let compra of comprasAuditoria" class="compra-card">
             
@@ -171,13 +162,11 @@
               <p style="margin: 0.25rem 0;"><strong>Inversión de Compra:</strong> {{ compra.total | currency:'S/ ' }}</p>
             </div>
 
-            <!-- CONDICIONAL 1: Pedido procesado -->
             <div *ngIf="compra.estado !== 'PENDIENTE_RECEPCION'" class="box-observacion">
               <h5>Bitácora de Observaciones de Almacén:</h5>
               <p>{{ compra.observacionesAlmacen || 'Sin incidencias. Mercadería recibida en perfectas condiciones según guía física.' }}</p>
             </div>
 
-            <!-- CONDICIONAL 2: Pedido en tránsito -->
             <div *ngIf="compra.estado === 'PENDIENTE_RECEPCION'" class="box-tracking-neutral">
               📦 <strong>Tracking Logístico:</strong> Orden transmitida al proveedor. Esperando arribo de camiones e inspección física de lotes en muelle.
             </div>
@@ -187,7 +176,6 @@
       </section>
     </div>
 
-    <!-- TEMPLATES DE ESPERA -->
     <ng-template #loadingStats><div class="placeholder">Cargando métricas corporativas...</div></ng-template>
     <ng-template #loadingActivity><div class="placeholder">Sincronizando registros relacionales con PostgreSQL...</div></ng-template>
   </main>

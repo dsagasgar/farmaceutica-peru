@@ -24,7 +24,7 @@ export class NuevoPedidoComponent implements OnInit, OnDestroy {
   private authService = inject(AuthService);
 
   private searchTerms = new Subject<string>();
-  private searchSubscription!: Subscription; // Para evitar fugas de memoria (memory leaks)
+  private searchSubscription!: Subscription;
 
   usuario: Usuario | null = null;
   productosDisponibles: Producto[] = [];
@@ -37,12 +37,11 @@ export class NuevoPedidoComponent implements OnInit, OnDestroy {
   clienteNombre = '';
   totalPedido = 0;
   procesandoPedido = false;
-  errorMensaje = ''; // Alerta visual para problemas de stock en el backend
+  errorMensaje = '';
 
   ngOnInit(): void {
     this.usuario = this.authService.obtenerUsuarioActual();
     
-    // Configura la búsqueda reactiva con el endpoint real /api/productos/venta
     this.searchSubscription = this.searchTerms.pipe(
       debounceTime(300),
       distinctUntilChanged(),
@@ -54,7 +53,6 @@ export class NuevoPedidoComponent implements OnInit, OnDestroy {
   }
 
   ngOnDestroy(): void {
-    // Buenas prácticas: limpiamos la suscripción al destruir el componente
     if (this.searchSubscription) {
       this.searchSubscription.unsubscribe();
     }
@@ -67,7 +65,6 @@ export class NuevoPedidoComponent implements OnInit, OnDestroy {
   agregarProducto(producto: Producto): void {
     const itemExistente = this.pedidoActual.find(item => item.producto.id === producto.id);
     if (itemExistente) {
-      // CORREGIDO: Se valida contra stockVenta que es el límite real del mostrador
       if (itemExistente.cantidad < producto.stockVenta) itemExistente.cantidad++;
     } else {
       if (producto.stockVenta > 0) {
@@ -83,7 +80,6 @@ export class NuevoPedidoComponent implements OnInit, OnDestroy {
     const nuevaCantidad = parseInt((event.target as HTMLInputElement).value, 10);
     const item = this.pedidoActual.find(i => i.producto.id === productoId);
     
-    // CORREGIDO: Consistencia con la cuota de stockVenta
     if (item && nuevaCantidad > 0 && nuevaCantidad <= item.producto.stockVenta) {
       item.cantidad = nuevaCantidad;
       this.calcularTotal();
@@ -129,7 +125,6 @@ export class NuevoPedidoComponent implements OnInit, OnDestroy {
     this.procesandoPedido = true;
     this.errorMensaje = '';
 
-    // CORREGIDO: Estructura limpia que coincide con Omit<Venta, 'id' | 'fecha' | 'estado'>
     const nuevaVenta = {
       clienteNombre: this.clienteNombre,
       quimicoId: this.usuario.id,
@@ -144,7 +139,6 @@ export class NuevoPedidoComponent implements OnInit, OnDestroy {
       total: this.totalPedido
     };
 
-    // Removido el cast 'as any' para garantizar un tipado estricto (strict typing contract)
     this.ventaService.crearVenta(nuevaVenta).subscribe({
       next: (ventaGenerada: Venta) => {
         this.procesandoPedido = false;

@@ -18,7 +18,7 @@ export class CajeroDashboardComponent {
   private ventaService = inject(VentaService);
   private router = inject(Router);
   private cdr = inject(ChangeDetectorRef);
-  private ngZone = inject(NgZone); // NEW: Core execution micro-task manager
+  private ngZone = inject(NgZone);
 
   usuario: Usuario | null = this.authService.obtenerUsuarioActual();
   ordenIdBusqueda: string = '';
@@ -40,7 +40,6 @@ export class CajeroDashboardComponent {
 
     this.ventaService.buscarOrdenPorId(idLimpio).subscribe({
       next: (orden) => {
-        // CORREGIDO: NgZone fuerza la sincronización de la UI anulando cuelgues de micro-tareas
         this.ngZone.run(() => {
           this.buscando = false;
           if (orden) {
@@ -52,7 +51,6 @@ export class CajeroDashboardComponent {
         });
       },
       error: (err) => {
-        // CORREGIDO: Garantía absoluta de desbloqueo del formulario ante errores de red o 404
         this.ngZone.run(() => {
           this.buscando = false;
           this.ordenSeleccionada = null;

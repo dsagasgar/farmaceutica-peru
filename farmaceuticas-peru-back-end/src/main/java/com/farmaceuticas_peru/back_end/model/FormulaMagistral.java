@@ -9,8 +9,7 @@ import jakarta.persistence.Entity;
 import jakarta.persistence.FetchType;
 import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
-import jakarta.persistence.Lob;
-import jakarta.persistence.ManyToOne;
+import jakarta.persistence.ManyToOne; // Removido: import jakarta.persistence.Lob;
 import jakarta.persistence.Table;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -27,8 +26,8 @@ import lombok.ToString;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-@ToString(exclude = "venta") // CORREGIDO: Evita evaluar el string extendido de la venta madre
-@EqualsAndHashCode(exclude = "venta") // CORREGIDO: Remueve la recursividad en contextos de persistencia (persistence contexts)
+@ToString(exclude = "venta")
+@EqualsAndHashCode(exclude = "venta")
 public class FormulaMagistral {
 
     @Id
@@ -36,11 +35,9 @@ public class FormulaMagistral {
 
     private String nombre;
 
-    @Lob
     @Column(columnDefinition = "TEXT")
     private String composicion;
 
-    @Lob
     @Column(columnDefinition = "TEXT")
     private String procedimiento;
 
@@ -48,6 +45,6 @@ public class FormulaMagistral {
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "venta_id")
-    @JsonIgnore // CORREGIDO: Bloqueo absoluto de serialización cíclica
+    @JsonIgnore 
     private Venta venta;
 }
